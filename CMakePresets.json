@@ -1,0 +1,78 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": { "major": 3, "minor": 25, "patch": 0 },
+  "configurePresets": [
+    {
+      "name": "default",
+      "displayName": "Default native (Debug, tests, clang-tidy, asan+ubsan)",
+      "binaryDir": "${sourceDir}/build/default",
+      "generator": "Ninja",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CUBINGTIMER_TESTING": "ON",
+        "PEDANTIC_COMPILER": "ON",
+        "ENABLE_TIDY": "ON",
+        "ENABLE_SANITIZER_ADDRESS": "ON",
+        "ENABLE_SANITIZER_UNDEFINED": "ON"
+      }
+    },
+    {
+      "name": "default-no-sanitize",
+      "displayName": "Like default but without asan/ubsan (for slower hardware or sanitizer-incompatible deps)",
+      "inherits": "default",
+      "binaryDir": "${sourceDir}/build/default-no-sanitize",
+      "cacheVariables": {
+        "ENABLE_SANITIZER_ADDRESS": "OFF",
+        "ENABLE_SANITIZER_UNDEFINED": "OFF"
+      }
+    },
+    {
+      "name": "release",
+      "inherits": "default",
+      "displayName": "Release native",
+      "binaryDir": "${sourceDir}/build/release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CUBINGTIMER_TESTING": "OFF"
+      }
+    },
+    {
+      "name": "wasm",
+      "displayName": "WebAssembly (build-only)",
+      "binaryDir": "${sourceDir}/build/wasm",
+      "generator": "Ninja",
+      "toolchainFile": "$env{QT_HOST_PATH}/../wasm_singlethread/lib/cmake/Qt6/qt.toolchain.cmake",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CUBINGTIMER_TESTING": "OFF"
+      }
+    },
+    {
+      "name": "android-arm64",
+      "displayName": "Android arm64-v8a APK",
+      "binaryDir": "${sourceDir}/build/android-arm64",
+      "generator": "Ninja",
+      "toolchainFile": "$env{QT_HOST_PATH}/../android_arm64_v8a/lib/cmake/Qt6/qt.toolchain.cmake",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CUBINGTIMER_TESTING": "OFF",
+        "ANDROID_ABI": "arm64-v8a",
+        "ANDROID_PLATFORM": "android-26"
+      }
+    }
+  ],
+  "buildPresets": [
+    { "name": "default",       "configurePreset": "default" },
+    { "name": "release",       "configurePreset": "release" },
+    { "name": "wasm",          "configurePreset": "wasm" },
+    { "name": "android-arm64", "configurePreset": "android-arm64" }
+  ],
+  "testPresets": [
+    {
+      "name": "default",
+      "configurePreset": "default",
+      "output": { "outputOnFailure": true },
+      "execution": { "stopOnFailure": false }
+    }
+  ]
+}

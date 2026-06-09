@@ -1,0 +1,78 @@
+// SPDX-License-Identifier: Apache-2.0
+#pragma once
+
+#include <CubingCore/ISolveStore.h>
+#include <CubingCore/Profile.h>
+#include <CubingCore/Session.h>
+
+#include <QtCore/QObject>
+#include <QtCore/QString>
+#include <QtCore/QStringList>
+#include <QtCore/QVariantList>
+#include <QtQml/QQmlEngine>
+
+namespace CubingTimer
+{
+
+/// Manages which profile and session are active. Exposes the lists to QML and
+/// owns "create profile / session / pick existing" logic so QML stays declarative.
+class ProfileController: public QObject
+{
+    Q_OBJECT
+    QML_ELEMENT
+
+    Q_PROPERTY(QStringList profileNames READ profileNames NOTIFY profilesChanged)
+    Q_PROPERTY(QVariantList sessions READ sessions NOTIFY sessionsChanged)
+    Q_PROPERTY(qint64 currentProfileId READ currentProfileId NOTIFY currentProfileChanged)
+    Q_PROPERTY(qint64 currentSessionId READ currentSessionId NOTIFY currentSessionChanged)
+    Q_PROPERTY(QString currentProfileName READ currentProfileName NOTIFY currentProfileChanged)
+    Q_PROPERTY(QString currentPuzzleKey READ currentPuzzleKey NOTIFY currentSessionChanged)
+
+  public:
+    explicit ProfileController(QObject* parent = nullptr);
+
+    void setStore(CubingCore::ISolveStore* store);
+
+    [[nodiscard]] QStringList profileNames() const;
+    [[nodiscard]] QVariantList sessions() const;
+    [[nodiscard]] qint64 currentProfileId() const noexcept { return _currentProfile.id; }
+    [[nodiscard]] qint64 currentSessionId() const noexcept { return _currentSession.id; }
+    [[nodiscard]] QString currentProfileName() const { return QString::fromStdString(_currentProfile.name); }
+    [[nodiscard]] QString currentPuzzleKey() const;
+
+  public slots:
+    /// Creates a new profile, refreshes the list, and switches to it.
+    /// @param name display name for the new profile.
+    void createProfile(QString const& name);
+    /// Switches to the profile at index `index` in `profileNames()`.
+    /// @param index zero-based row index; out-of-range values are ignored.
+    void selectProfile(int index);
+
+    /// Creates a session for the current profile and switches to it.
+    /// @param name      display name for the new session.
+    /// @param puzzleKey "222" / "333" / "444".
+    void createSession(QString const& name, QString const& puzzleKey);
+    /// Switches to the session at index `index` within the current profile.
+    /// @param index zero-based row index; out-of-range values are ignored.
+    void selectSession(int index);
+
+    /// Refreshes the profile/session lists from the store.
+    void reload();
+
+  signals:
+    void profilesChanged();
+    void sessionsChanged();
+    void currentProfileChanged();
+    void currentSessionChanged();
+
+  private:
+    void ensureDefaults();
+
+    CubingCore::ISolveStore* _store = nullptr;
+    std::vector<CubingCore::Profile> _profiles;
+    std::vector<CubingCore::Session> _sessions;
+    CubingCore::Profile _currentProfile;
+    CubingCore::Session _currentSession;
+};
+
+} // namespace CubingTimer
