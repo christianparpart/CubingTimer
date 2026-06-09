@@ -40,7 +40,7 @@ non-desktop targets, retained for 90 days:
   browser. WASM cannot run as a `file://` URL.
 
 Find them on the [Actions tab](https://github.com/christianparpart/CubingTimer/actions/workflows/build.yml)
-— pick the latest green run on `main`, scroll to the bottom of the
+— pick the latest green run on `master`, scroll to the bottom of the
 page and download the `CubingTimer-android-arm64-v8a` or
 `CubingTimer-wasm` artifact.
 
