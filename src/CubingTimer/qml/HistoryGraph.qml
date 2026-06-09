@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Controls
-import QtCharts
+import QtGraphs
 
 Frame {
     id: root
@@ -8,8 +8,11 @@ Frame {
     function rebuild() {
         series.clear();
         var n = sessionModel.count;
-        if (n === 0)
+        if (n === 0) {
+            axisX.max = 1;
+            axisY.max = 1;
             return;
+        }
         var max = 0;
         for (var i = 0; i < n; ++i) {
             var idx = sessionModel.index(i, 0);
@@ -31,23 +34,25 @@ Frame {
 
     Component.onCompleted: rebuild()
 
-    ChartView {
+    GraphsView {
         anchors.fill: parent
-        antialiasing: true
-        legend.visible: false
-        backgroundColor: "transparent"
-        margins.top: 6
-        margins.bottom: 6
-        margins.left: 6
-        margins.right: 6
 
-        ValueAxis { id: axisX; min: 0; max: 1; tickCount: 5; titleText: qsTr("Solve #") }
-        ValueAxis { id: axisY; min: 0; max: 1; titleText: qsTr("Seconds") }
+        axisX: ValueAxis {
+            id: axisX
+            min: 0
+            max: 1
+            subTickCount: 1
+            titleText: qsTr("Solve #")
+        }
+        axisY: ValueAxis {
+            id: axisY
+            min: 0
+            max: 1
+            titleText: qsTr("Seconds")
+        }
 
         LineSeries {
             id: series
-            axisX: axisX
-            axisY: axisY
             color: "#1565c0"
             width: 2
         }

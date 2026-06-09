@@ -29,11 +29,10 @@ target_link_libraries(CubingTimerApp PRIVATE
     CubingDB
     Qt6::Core
     Qt6::Gui
-    Qt6::Widgets
     Qt6::Qml
     Qt6::Quick
     Qt6::QuickControls2
-    Qt6::Charts
+    Qt6::Graphs
     Qt6::Sql
 )
 

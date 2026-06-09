@@ -45,9 +45,9 @@ include(PedanticCompiler)
 include(Sanitizers)
 
 # Qt6 ---------------------------------------------------------------------
-set(QT_MIN_VERSION 6.5)
+set(QT_MIN_VERSION 6.6) # QtGraphs lands in 6.6
 find_package(Qt6 ${QT_MIN_VERSION} REQUIRED
-    COMPONENTS Core Gui Widgets Qml Quick QuickControls2 Charts Sql)
+    COMPONENTS Core Gui Qml Quick QuickControls2 Graphs Sql)
 
 qt_standard_project_setup(REQUIRES ${QT_MIN_VERSION})
 

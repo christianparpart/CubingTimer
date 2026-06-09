@@ -26,8 +26,8 @@ never be — the goal is "small and focused", not "feature parity with csTimer".
 
 ## Building
 
-You need a C++23 compiler, CMake ≥ 3.25, Ninja, and Qt 6.5+ with the
-`Qml`, `Quick`, `QuickControls2`, `Charts`, and `Sql` modules.
+You need a C++23 compiler, CMake ≥ 3.25, Ninja, and Qt 6.6+ with the
+`Qml`, `Quick`, `QuickControls2`, `Graphs`, and `Sql` modules.
 
 ```sh
 cmake --preset default

@@ -29,13 +29,13 @@ jobs:
         include:
           - os: ubuntu-latest
             preset: default
-            install_aqt_modules: 'qtcharts'
+            install_aqt_modules: 'qtgraphs qtquick3d qtshadertools'
           - os: macos-latest
             preset: default
-            install_aqt_modules: 'qtcharts'
+            install_aqt_modules: 'qtgraphs qtquick3d qtshadertools'
           - os: windows-latest
             preset: default
-            install_aqt_modules: 'qtcharts'
+            install_aqt_modules: 'qtgraphs qtquick3d qtshadertools'
     steps:
       - uses: actions/checkout@v4
 
@@ -103,7 +103,7 @@ jobs:
         uses: jurplel/install-qt-action@v4
         with:
           version: ${{ env.QT_VERSION }}
-          modules: 'qtcharts'
+          modules: 'qtgraphs qtquick3d qtshadertools'
           cache: true
           set-env: false
           dir: ${{ github.workspace }}/qt-host
@@ -114,7 +114,7 @@ jobs:
           version: ${{ env.QT_VERSION }}
           target: 'desktop'
           arch: 'wasm_singlethread'
-          modules: 'qtcharts'
+          modules: 'qtgraphs qtquick3d qtshadertools'
           cache: true
           set-env: false
           dir: ${{ github.workspace }}/qt-wasm
@@ -171,7 +171,7 @@ jobs:
         uses: jurplel/install-qt-action@v4
         with:
           version: ${{ env.QT_VERSION }}
-          modules: 'qtcharts'
+          modules: 'qtgraphs qtquick3d qtshadertools'
           cache: true
           set-env: false
           dir: ${{ github.workspace }}/qt-host
@@ -182,7 +182,7 @@ jobs:
           version: ${{ env.QT_VERSION }}
           target: 'android'
           arch: 'android_arm64_v8a'
-          modules: 'qtcharts'
+          modules: 'qtgraphs qtquick3d qtshadertools'
           cache: true
           set-env: false
           dir: ${{ github.workspace }}/qt-android

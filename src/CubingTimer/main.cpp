@@ -9,10 +9,10 @@
 
 #include <QtCore/QDir>
 #include <QtCore/QStandardPaths>
+#include <QtGui/QGuiApplication>
 #include <QtQml/QQmlApplicationEngine>
 #include <QtQml/QQmlContext>
 #include <QtQuickControls2/QQuickStyle>
-#include <QtWidgets/QApplication>
 
 #include <memory>
 
@@ -36,12 +36,9 @@ namespace
 
 int main(int argc, char* argv[])
 {
-    // QtCharts pulls in QtWidgets internally (QGraphicsTextItem etc.), so the
-    // app must be a QApplication, not a QGuiApplication. Using QGuiApplication
-    // crashes the chart widget at QML instantiation time.
-    QApplication app(argc, argv);
-    QApplication::setApplicationName("CubingTimer");
-    QApplication::setOrganizationName("CubingTimer");
+    QGuiApplication app(argc, argv);
+    QGuiApplication::setApplicationName("CubingTimer");
+    QGuiApplication::setOrganizationName("CubingTimer");
     QQuickStyle::setStyle("Material");
 
     auto store = makeStore();
@@ -89,5 +86,5 @@ int main(int argc, char* argv[])
     engine.loadFromModule("CubingTimer", "Main");
     if (engine.rootObjects().isEmpty())
         return 1;
-    return QApplication::exec();
+    return QGuiApplication::exec();
 }
