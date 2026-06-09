@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <expected>
+#include <span>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -40,13 +41,25 @@ class ISolveStore
     /// @param name display name.
     /// @return the created profile with `id` populated, or a StoreError.
     [[nodiscard]] virtual std::expected<Profile, StoreError> createProfile(std::string_view name) = 0;
-    /// Lists all profiles in insertion order.
+    /// Lists all profiles in user-defined order (then by id for ties).
     /// @return the profiles, or a StoreError.
     [[nodiscard]] virtual std::expected<std::vector<Profile>, StoreError> listProfiles() = 0;
     /// Deletes a profile; cascades to sessions and solves.
     /// @param profileId id of the profile to delete.
     /// @return void on success; NotFound if no row matched.
     [[nodiscard]] virtual std::expected<void, StoreError> deleteProfile(std::int64_t profileId) = 0;
+    /// Renames a profile.
+    /// @param profileId id of the profile to rename.
+    /// @param newName new display name (must be non-empty).
+    /// @return void on success; NotFound if no row matched; InvalidArgument on empty name.
+    [[nodiscard]] virtual std::expected<void, StoreError> renameProfile(std::int64_t profileId,
+                                                                        std::string_view newName) = 0;
+    /// Replaces the user-defined ordering of profiles. The order in `orderedIds` is
+    /// the new display order; profile ids missing from the list keep their previous
+    /// sort_order (they will sort after the listed ones).
+    /// @param orderedIds profile ids in their new display order.
+    /// @return void on success, Backend on error.
+    [[nodiscard]] virtual std::expected<void, StoreError> reorderProfiles(std::span<std::int64_t const> orderedIds) = 0;
 
     // --- sessions ---
     /// Creates a session under a profile.

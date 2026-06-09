@@ -251,16 +251,24 @@ jobs:
       - name: Build
         run: cmake --build build/wasm --parallel
 
-      - name: Upload wasm artifacts
+      - name: Stage wasm bundle for upload
+        # Drop the four loader files into a dedicated dir so the downloaded
+        # zip extracts as `CubingTimer-wasm/{html,js,wasm,qtloader.js}`.
+        run: |
+          mkdir -p dist/CubingTimer-wasm
+          cp build/wasm/src/CubingTimer/CubingTimerApp.html dist/CubingTimer-wasm/index.html
+          cp build/wasm/src/CubingTimer/CubingTimerApp.js dist/CubingTimer-wasm/
+          cp build/wasm/src/CubingTimer/CubingTimerApp.wasm dist/CubingTimer-wasm/
+          cp build/wasm/src/CubingTimer/qtloader.js dist/CubingTimer-wasm/
+
+      - name: Upload wasm artifact
         uses: actions/upload-artifact@v4
         with:
-          name: cubingtimer-wasm
-          path: |
-            build/wasm/src/CubingTimer/CubingTimerApp.html
-            build/wasm/src/CubingTimer/CubingTimerApp.js
-            build/wasm/src/CubingTimer/CubingTimerApp.wasm
-            build/wasm/src/CubingTimer/qtloader.js
-          if-no-files-found: warn
+          name: CubingTimer-wasm
+          path: dist/CubingTimer-wasm/
+          if-no-files-found: error
+          retention-days: 90
+          compression-level: 9
 
   # -------------------------------------------------------------------------
   # Android APK: cross-compile, no tests on device.
@@ -348,9 +356,21 @@ jobs:
       - name: Build APK
         run: cmake --build build/android --target apk
 
+      - name: Stage APK with friendly name
+        run: |
+          mkdir -p dist
+          apk=$(find build/android/src/CubingTimer/android-build/build/outputs/apk -name '*.apk' | head -1)
+          if [ -z "$apk" ]; then
+            echo "No APK found"; exit 1
+          fi
+          cp "$apk" dist/CubingTimer-arm64-v8a.apk
+          ls -la dist/
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: cubingtimer-android-arm64-v8a
-          path: build/android/src/CubingTimer/android-build/build/outputs/apk/**/*.apk
-          if-no-files-found: warn
+          name: CubingTimer-android-arm64-v8a
+          path: dist/CubingTimer-arm64-v8a.apk
+          if-no-files-found: error
+          retention-days: 90
+          compression-level: 9

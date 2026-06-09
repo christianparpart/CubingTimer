@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 #include <catch2/catch_test_macros.hpp>
 
+#include <array>
+#include <cstdint>
+#include <span>
+
 #include <CubingDB/InMemorySolveStore.hpp>
 #include <QtSql/QSqlDatabase>
 
@@ -102,4 +106,59 @@ TEST_CASE("deleteSolve returns NotFound on missing id", "[db]")
     auto const r = store.deleteSolve(99999);
     REQUIRE_FALSE(r.has_value());
     REQUIRE(r.error() == StoreError::NotFound);
+}
+
+TEST_CASE("renameProfile changes the name in subsequent lookups", "[db]")
+{
+    InMemorySolveStore store;
+    auto const p = store.createProfile("old").value();
+
+    REQUIRE(store.renameProfile(p.id, "new").has_value());
+
+    auto const list = store.listProfiles().value();
+    REQUIRE(list.size() == 1);
+    REQUIRE(list[0].id == p.id);
+    REQUIRE(list[0].name == "new");
+}
+
+TEST_CASE("renameProfile rejects empty name", "[db]")
+{
+    InMemorySolveStore store;
+    auto const p = store.createProfile("alice").value();
+    auto const r = store.renameProfile(p.id, "");
+    REQUIRE_FALSE(r.has_value());
+    REQUIRE(r.error() == StoreError::InvalidArgument);
+}
+
+TEST_CASE("renameProfile returns NotFound for unknown id", "[db]")
+{
+    InMemorySolveStore store;
+    auto const r = store.renameProfile(99999, "x");
+    REQUIRE_FALSE(r.has_value());
+    REQUIRE(r.error() == StoreError::NotFound);
+}
+
+TEST_CASE("reorderProfiles changes listProfiles order", "[db]")
+{
+    InMemorySolveStore store;
+    auto const a = store.createProfile("a").value();
+    auto const b = store.createProfile("b").value();
+    auto const c = store.createProfile("c").value();
+
+    // Default order is insertion order: a, b, c.
+    {
+        auto const list = store.listProfiles().value();
+        REQUIRE(list.size() == 3);
+        REQUIRE(list[0].name == "a");
+        REQUIRE(list[2].name == "c");
+    }
+
+    std::array const newOrder { c.id, a.id, b.id };
+    REQUIRE(store.reorderProfiles(std::span<std::int64_t const>(newOrder)).has_value());
+
+    auto const list = store.listProfiles().value();
+    REQUIRE(list.size() == 3);
+    REQUIRE(list[0].name == "c");
+    REQUIRE(list[1].name == "a");
+    REQUIRE(list[2].name == "b");
 }

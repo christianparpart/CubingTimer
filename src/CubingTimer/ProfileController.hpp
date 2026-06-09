@@ -55,6 +55,19 @@ class ProfileController: public QObject
     /// Switches to the profile at index `index` in `profileNames()`.
     /// @param index zero-based row index; out-of-range values are ignored.
     void selectProfile(int index);
+    /// Renames the profile at `index`. Empty/whitespace names are ignored.
+    /// @param index zero-based row index in `profileNames()`.
+    /// @param newName new display name.
+    void renameProfile(int index, QString const& newName);
+    /// Deletes the profile at `index`. The last profile cannot be deleted —
+    /// a default profile is recreated immediately if there would be none left.
+    /// @param index zero-based row index in `profileNames()`.
+    void deleteProfile(int index);
+    /// Moves the profile at `from` to position `to` in the list.
+    /// Both must be valid indices; otherwise no-op.
+    /// @param from current zero-based index.
+    /// @param to   new zero-based index.
+    void moveProfile(int from, int to);
 
     /// Creates a session for the current profile and switches to it.
     /// @param name      display name for the new session.

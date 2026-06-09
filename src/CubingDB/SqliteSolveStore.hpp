@@ -29,6 +29,10 @@ class SqliteSolveStore: public CubingCore::ISolveStore
     [[nodiscard]] std::expected<CubingCore::Profile, CubingCore::StoreError> createProfile(std::string_view name) override;
     [[nodiscard]] std::expected<std::vector<CubingCore::Profile>, CubingCore::StoreError> listProfiles() override;
     [[nodiscard]] std::expected<void, CubingCore::StoreError> deleteProfile(std::int64_t profileId) override;
+    [[nodiscard]] std::expected<void, CubingCore::StoreError> renameProfile(std::int64_t profileId,
+                                                                            std::string_view newName) override;
+    [[nodiscard]] std::expected<void, CubingCore::StoreError> reorderProfiles(
+        std::span<std::int64_t const> orderedIds) override;
 
     [[nodiscard]] std::expected<CubingCore::Session, CubingCore::StoreError> createSession(
         std::int64_t profileId, std::string_view name, CubingCore::Puzzle puzzle) override;

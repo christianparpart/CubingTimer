@@ -4,6 +4,8 @@ A small Qt6/QML speedcubing timer. It tries to do the things [csTimer](https://c
 does that I actually use — time my solves, give me a scramble, remember my
 history, and tell me my PB — without ads or a browser tab.
 
+![CubingTimer on macOS](docs/screenshot.png)
+
 ## Status
 
 Early. Works on desktop (Linux/macOS/Windows). WebAssembly and Android builds
@@ -23,6 +25,24 @@ never be — the goal is "small and focused", not "feature parity with csTimer".
   last 90 days.
 - A small line chart of solve times over time.
 - CSV / JSON export-import so your history is yours.
+
+## Pre-built downloads
+
+Each successful CI build uploads ready-to-use artifacts for the
+non-desktop targets, retained for 90 days:
+
+- **Android APK (arm64-v8a)** — install with `adb install
+  CubingTimer-arm64-v8a.apk`, or transfer to the device and tap the
+  file. The APK is unsigned, so you'll need to allow installs from
+  unknown sources.
+- **WebAssembly bundle** — extract the zip, then serve the four files
+  over HTTP (`python3 -m http.server`) and open `index.html` in a
+  browser. WASM cannot run as a `file://` URL.
+
+Find them on the [Actions tab](https://github.com/christianparpart/CubingTimer/actions/workflows/build.yml)
+— pick the latest green run on `main`, scroll to the bottom of the
+page and download the `CubingTimer-android-arm64-v8a` or
+`CubingTimer-wasm` artifact.
 
 ## Building
 

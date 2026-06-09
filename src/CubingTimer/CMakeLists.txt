@@ -23,6 +23,7 @@ qt_add_qml_module(CubingTimerApp
         qml/StatsPanel.qml
         qml/HistoryGraph.qml
         qml/SolveList.qml
+        qml/ManageProfilesDialog.qml
 )
 
 # qt_add_qml_module appends generated cpp files (qmlcache loaders, type
@@ -60,8 +61,10 @@ if(CUBINGTIMER_TESTING)
         TimerController.cpp
         SessionModel.cpp
         StatsModel.cpp
+        ProfileController.cpp
         TimerController_test.cpp
         StatsModel_test.cpp
+        ProfileController_test.cpp
     )
     set_target_properties(CubingTimer_test PROPERTIES
         AUTOMOC ON

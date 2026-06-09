@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Controls.Material
 import QtQuick.Layouts
 
 Item {
@@ -22,21 +23,27 @@ Item {
         return statsModel.formatMs(ms);
     }
 
+    // Scale the big time display so it always fits the available width.
+    // ~ width / 5 puts ~5 characters across a typical view; clamp so it neither
+    // disappears on narrow phones nor swamps a wide desktop window.
+    readonly property real bigTimePx: Math.max(48, Math.min(width / 5, height / 3.5, 200))
+    readonly property real scramblePx: Math.max(14, Math.min(width / 30, 24))
+
     Rectangle {
         anchors.fill: parent
         color: stateColor(timerController.state)
 
         ColumnLayout {
             anchors.fill: parent
-            anchors.margins: 24
-            spacing: 16
+            anchors.margins: 16
+            spacing: 12
 
             Label {
-                Layout.alignment: Qt.AlignHCenter
+                Layout.fillWidth: true
                 text: scrambleProvider.current
                 wrapMode: Text.WordWrap
                 horizontalAlignment: Text.AlignHCenter
-                font.pixelSize: 22
+                font.pixelSize: root.scramblePx
             }
 
             Item { Layout.fillHeight: true }
@@ -44,8 +51,9 @@ Item {
             Label {
                 id: bigTime
                 Layout.alignment: Qt.AlignHCenter
-                font.pixelSize: 120
+                font.pixelSize: root.bigTimePx
                 font.bold: true
+                fontSizeMode: Text.HorizontalFit
                 text: timerController.inspectionEnabled
                       && (timerController.state === 2 || timerController.state === 3 || timerController.state === 4)
                       ? Math.max(0, 15 - Math.floor(timerController.inspectionElapsedMs / 1000)).toString()
@@ -65,9 +73,12 @@ Item {
 
             Item { Layout.fillHeight: true }
 
-            RowLayout {
+            // Flow wraps to a second line on narrow widths so nothing clips.
+            Flow {
                 Layout.alignment: Qt.AlignHCenter
-                spacing: 12
+                Layout.fillWidth: true
+                spacing: 8
+
                 Button {
                     text: qsTr("+2")
                     enabled: timerController.state === 6
@@ -83,7 +94,6 @@ Item {
                     enabled: timerController.state === 6
                     onClicked: sessionModel.setLastPenalty(0)
                 }
-                Item { Layout.preferredWidth: 24 }
                 CheckBox {
                     text: qsTr("Inspection")
                     checked: timerController.inspectionEnabled

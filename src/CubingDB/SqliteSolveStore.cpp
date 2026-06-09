@@ -20,7 +20,7 @@ namespace CubingDB
 
 namespace
 {
-    constexpr int SchemaVersion = 1;
+    constexpr int SchemaVersion = 2;
 
     /// Returns a process-unique connection name so multiple stores can coexist
     /// in tests / multiple-instance scenarios.
@@ -106,10 +106,23 @@ struct SqliteSolveStore::Impl
             CREATE TABLE IF NOT EXISTS profile (
                 id         INTEGER PRIMARY KEY AUTOINCREMENT,
                 name       TEXT NOT NULL,
-                created_at INTEGER NOT NULL
+                created_at INTEGER NOT NULL,
+                sort_order INTEGER NOT NULL DEFAULT 0
             )
         )")))
             return false;
+
+        // v1 -> v2: add sort_order column if upgrading an existing database.
+        // (CREATE TABLE IF NOT EXISTS above is a no-op on existing tables,
+        // so the column needs to be added explicitly.)
+        if (version >= 1 && version < 2)
+        {
+            QSqlQuery alter(db);
+            // sqlite ignores duplicate-column errors here when upgrading from a
+            // freshly-created v1 table that already had the column, but a real
+            // v1 database needs the ALTER.
+            (void) alter.exec(QStringLiteral("ALTER TABLE profile ADD COLUMN sort_order INTEGER NOT NULL DEFAULT 0"));
+        }
         if (!q.exec(QStringLiteral(R"(
             CREATE TABLE IF NOT EXISTS session (
                 id          INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -170,7 +183,7 @@ std::expected<Profile, StoreError> SqliteSolveStore::createProfile(std::string_v
 std::expected<std::vector<Profile>, StoreError> SqliteSolveStore::listProfiles()
 {
     QSqlQuery q(_impl->db);
-    if (!q.exec(QStringLiteral("SELECT id, name, created_at FROM profile ORDER BY id")))
+    if (!q.exec(QStringLiteral("SELECT id, name, created_at FROM profile ORDER BY sort_order, id")))
         return std::unexpected(StoreError::Backend);
     std::vector<Profile> out;
     while (q.next())
@@ -193,6 +206,43 @@ std::expected<void, StoreError> SqliteSolveStore::deleteProfile(std::int64_t pro
         return std::unexpected(StoreError::Backend);
     if (q.numRowsAffected() == 0)
         return std::unexpected(StoreError::NotFound);
+    return {};
+}
+
+std::expected<void, StoreError> SqliteSolveStore::renameProfile(std::int64_t profileId, std::string_view newName)
+{
+    if (newName.empty())
+        return std::unexpected(StoreError::InvalidArgument);
+    QSqlQuery q(_impl->db);
+    q.prepare(QStringLiteral("UPDATE profile SET name = ? WHERE id = ?"));
+    q.addBindValue(QString::fromUtf8(newName.data(), static_cast<qsizetype>(newName.size())));
+    q.addBindValue(QVariant::fromValue<qlonglong>(profileId));
+    if (!q.exec())
+        return std::unexpected(StoreError::Backend);
+    if (q.numRowsAffected() == 0)
+        return std::unexpected(StoreError::NotFound);
+    return {};
+}
+
+std::expected<void, StoreError> SqliteSolveStore::reorderProfiles(std::span<std::int64_t const> orderedIds)
+{
+    if (!_impl->db.transaction())
+        return std::unexpected(StoreError::Backend);
+    QSqlQuery q(_impl->db);
+    q.prepare(QStringLiteral("UPDATE profile SET sort_order = ? WHERE id = ?"));
+    int order = 0;
+    for (auto const id: orderedIds)
+    {
+        q.addBindValue(order++);
+        q.addBindValue(QVariant::fromValue<qlonglong>(id));
+        if (!q.exec())
+        {
+            (void) _impl->db.rollback();
+            return std::unexpected(StoreError::Backend);
+        }
+    }
+    if (!_impl->db.commit())
+        return std::unexpected(StoreError::Backend);
     return {};
 }
 
