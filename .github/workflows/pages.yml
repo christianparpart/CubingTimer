@@ -1,0 +1,83 @@
+name: deploy-pages
+
+# Triggered by a successful run of build.yml on master. We don't rebuild
+# WASM here — we just download the CubingTimer-wasm artifact the build
+# workflow uploads and hand it to actions/deploy-pages.
+on:
+  workflow_run:
+    workflows: [build]
+    types: [completed]
+    branches: [master]
+  workflow_dispatch:
+
+# A single concurrent deployment, matching the official Pages template.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+  actions: read  # needed to download artifacts from another workflow run
+
+jobs:
+  deploy:
+    # Only run if the upstream build went green. Without this, a failed build
+    # on master would still try to publish (it wouldn't have an artifact).
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-24.04
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Download wasm artifact from build run
+        if: ${{ github.event_name == 'workflow_run' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: CubingTimer-wasm
+          path: site/
+          github-token: ${{ github.token }}
+          run-id: ${{ github.event.workflow_run.id }}
+
+      - name: Download wasm artifact from latest successful master build
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p site
+          # Find the most recent successful build on master and pull its wasm artifact.
+          run_id=$(gh run list \
+            --repo "${{ github.repository }}" \
+            --workflow build.yml \
+            --branch master \
+            --status success \
+            --limit 1 \
+            --json databaseId \
+            --jq '.[0].databaseId')
+          if [ -z "$run_id" ]; then
+            echo "::error::No successful master build to publish."
+            exit 1
+          fi
+          echo "Using run $run_id"
+          gh run download "$run_id" --repo "${{ github.repository }}" --name CubingTimer-wasm --dir site
+
+      - name: Inspect bundle
+        run: |
+          ls -la site/
+          # Sanity-check the four expected files.
+          for f in index.html CubingTimerApp.js CubingTimerApp.wasm qtloader.js; do
+            test -f "site/$f" || { echo "::error::Missing $f in artifact"; exit 1; }
+          done
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site/
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

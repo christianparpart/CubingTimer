@@ -26,6 +26,17 @@ never be — the goal is "small and focused", not "feature parity with csTimer".
 - A small line chart of solve times over time.
 - CSV / JSON export-import so your history is yours.
 
+## Try it in the browser
+
+The WASM build is auto-deployed from `master` to GitHub Pages on
+every green build:
+
+**<https://christianparpart.github.io/CubingTimer/>**
+
+It runs fully client-side — solves are kept in an in-memory SQLite
+that lives for the tab; use the CSV/JSON export if you want to keep
+them across visits.
+
 ## Pre-built downloads
 
 Each successful CI build uploads ready-to-use artifacts for the
