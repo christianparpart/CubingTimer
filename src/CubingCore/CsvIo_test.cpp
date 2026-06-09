@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
-#include <CubingCore/CsvIo.h>
-
 #include <catch2/catch_test_macros.hpp>
+
+#include <CubingCore/CsvIo.hpp>
 
 using namespace CubingCore;
 using namespace CubingCore::csv;

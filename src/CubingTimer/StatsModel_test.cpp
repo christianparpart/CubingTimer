@@ -1,35 +1,15 @@
 // SPDX-License-Identifier: Apache-2.0
-#include <CubingDB/InMemorySolveStore.h>
-#include <CubingTimer/SessionModel.h>
-#include <CubingTimer/StatsModel.h>
-
-#include <QtCore/QCoreApplication>
-#include <QtTest/QSignalSpy>
-
 #include <catch2/catch_test_macros.hpp>
 
-namespace
-{
-    struct QtFixture
-    {
-        QtFixture()
-        {
-            if (!QCoreApplication::instance())
-            {
-                static int argc = 0;
-                static char* argv[] = { nullptr };
-                static QCoreApplication app(argc, argv);
-                (void) app;
-            }
-        }
-    };
-    QtFixture gQt;
-} // namespace
+#include <CubingDB/InMemorySolveStore.hpp>
+#include <CubingTimer/SessionModel.hpp>
+#include <CubingTimer/StatsModel.hpp>
+#include <QtTest/QSignalSpy>
 
 using namespace CubingCore;
+using CubingDB::InMemorySolveStore;
 using CubingTimer::SessionModel;
 using CubingTimer::StatsModel;
-using CubingDB::InMemorySolveStore;
 
 TEST_CASE("formatMs renders centiseconds for short solves", "[stats-model]")
 {

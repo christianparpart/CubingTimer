@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
-#include <CubingCore/Scrambler.h>
-
 #include <cassert>
 #include <string>
+
+#include <CubingCore/Scrambler.hpp>
 
 namespace CubingCore
 {
@@ -13,18 +13,26 @@ namespace
     {
         switch (face)
         {
-            case Face::U: return 'U';
-            case Face::D: return 'D';
-            case Face::L: return 'L';
-            case Face::R: return 'R';
-            case Face::F: return 'F';
-            case Face::B: return 'B';
+            case Face::U:
+                return 'U';
+            case Face::D:
+                return 'D';
+            case Face::L:
+                return 'L';
+            case Face::R:
+                return 'R';
+            case Face::F:
+                return 'F';
+            case Face::B:
+                return 'B';
         }
         return '?';
     }
 } // namespace
 
-Scrambler::Scrambler(PuzzleSpec const& spec, RandomFn rng): _spec(&spec), _rng(std::move(rng))
+Scrambler::Scrambler(PuzzleSpec const& spec, RandomFn rng):
+    _spec(&spec),
+    _rng(std::move(rng))
 {
     assert(_rng && "RNG must be callable");
     assert(!_spec->faces.empty() && "PuzzleSpec must provide at least one face");
@@ -91,9 +99,14 @@ std::string Scrambler::formatMove(Move move)
         out.push_back('w');
     switch (move.amount)
     {
-        case Amount::Cw: break;
-        case Amount::Half: out.push_back('2'); break;
-        case Amount::Ccw: out.push_back('\''); break;
+        case Amount::Cw:
+            break;
+        case Amount::Half:
+            out.push_back('2');
+            break;
+        case Amount::Ccw:
+            out.push_back('\'');
+            break;
     }
     return out;
 }

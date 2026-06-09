@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 #pragma once
 
-#include <CubingCore/Puzzle.h>
-
 #include <chrono>
 #include <cstdint>
 #include <optional>
 #include <string>
+
+#include <CubingCore/Puzzle.hpp>
 
 namespace CubingCore
 {
@@ -26,24 +26,27 @@ using Timestamp = std::chrono::system_clock::time_point;
 /// Penalty is stored separately from rawTime so it can be reverted.
 struct Solve
 {
-    std::int64_t id = 0;                            ///< 0 ⇒ not yet persisted
+    std::int64_t id = 0; ///< 0 ⇒ not yet persisted
     std::int64_t sessionId = 0;
     Puzzle puzzle = Puzzle::ThreeByThree;
     Timestamp timestamp = {};
-    Milliseconds rawTime { 0 };                     ///< measured time before penalties
+    Milliseconds rawTime { 0 }; ///< measured time before penalties
     Penalty penalty = Penalty::Ok;
     std::string scramble;
     std::string comment;
-    std::optional<Milliseconds> inspection;         ///< inspection time used (if any)
+    std::optional<Milliseconds> inspection; ///< inspection time used (if any)
 
     /// The time as displayed/ranked: rawTime + 2s for +2, nullopt for DNF.
     [[nodiscard]] std::optional<Milliseconds> effectiveTime() const noexcept
     {
         switch (penalty)
         {
-            case Penalty::Ok: return rawTime;
-            case Penalty::PlusTwo: return rawTime + std::chrono::seconds(2);
-            case Penalty::Dnf: return std::nullopt;
+            case Penalty::Ok:
+                return rawTime;
+            case Penalty::PlusTwo:
+                return rawTime + std::chrono::seconds(2);
+            case Penalty::Dnf:
+                return std::nullopt;
         }
         return rawTime;
     }

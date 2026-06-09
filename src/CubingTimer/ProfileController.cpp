@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
-#include <CubingTimer/ProfileController.h>
-
-#include <QtCore/QVariantMap>
-
 #include <algorithm>
 #include <ranges>
+
+#include <CubingTimer/ProfileController.hpp>
+#include <QtCore/QVariantMap>
 
 using CubingCore::Profile;
 using CubingCore::Puzzle;
@@ -13,7 +12,10 @@ using CubingCore::Session;
 namespace CubingTimer
 {
 
-ProfileController::ProfileController(QObject* parent): QObject(parent) {}
+ProfileController::ProfileController(QObject* parent):
+    QObject(parent)
+{
+}
 
 void ProfileController::setStore(CubingCore::ISolveStore* store)
 {
@@ -38,9 +40,7 @@ void ProfileController::reload()
     }
 
     // If current is missing, pick the first.
-    auto const stillExists = std::ranges::any_of(_profiles, [this](auto const& p) {
-        return p.id == _currentProfile.id;
-    });
+    auto const stillExists = std::ranges::any_of(_profiles, [this](auto const& p) { return p.id == _currentProfile.id; });
     if (!stillExists)
         _currentProfile = _profiles.front();
 
@@ -110,8 +110,7 @@ QVariantList ProfileController::sessions() const
 QString ProfileController::currentPuzzleKey() const
 {
     return QString::fromUtf8(CubingCore::specOf(_currentSession.puzzle).name.data(),
-                             static_cast<qsizetype>(
-                                 CubingCore::specOf(_currentSession.puzzle).name.size()));
+                             static_cast<qsizetype>(CubingCore::specOf(_currentSession.puzzle).name.size()));
 }
 
 void ProfileController::createProfile(QString const& name)
@@ -143,8 +142,7 @@ void ProfileController::selectProfile(int index)
         return;
     _currentProfile = _profiles[static_cast<std::size_t>(index)];
     auto const sessions = _store ? _store->listSessions(_currentProfile.id)
-                                 : std::expected<std::vector<Session>, CubingCore::StoreError>(
-                                       std::vector<Session> {});
+                                 : std::expected<std::vector<Session>, CubingCore::StoreError>(std::vector<Session> {});
     if (sessions)
         _sessions = *sessions;
     if (_sessions.empty() && _store)

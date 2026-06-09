@@ -1,29 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
-#include <CubingTimer/TimerController.h>
-
-#include <QtCore/QCoreApplication>
-#include <QtTest/QSignalSpy>
-#include <QtTest/QTest>
-
 #include <catch2/catch_test_macros.hpp>
 
-namespace
-{
-    struct QtFixture
-    {
-        QtFixture()
-        {
-            if (!QCoreApplication::instance())
-            {
-                static int argc = 0;
-                static char* argv[] = { nullptr };
-                static QCoreApplication app(argc, argv);
-                (void) app;
-            }
-        }
-    };
-    QtFixture gQt;
-} // namespace
+#include <CubingTimer/TimerController.hpp>
+#include <QtTest/QSignalSpy>
+#include <QtTest/QTest>
 
 using CubingTimer::TimerController;
 
@@ -44,6 +24,25 @@ TEST_CASE("Hold-pending then released too soon returns to Idle", "[timer]")
     REQUIRE(t.state() == TimerController::State::Idle);
 }
 
+namespace
+{
+/// Polls until `state` is reached or `timeoutMs` elapses, returning whether the
+/// state was observed. Uses Qt's event loop so QTimer fires. Lets us tolerate
+/// CI jitter under ASan/UBSan without sleeping a fixed (long) amount.
+bool waitForState(TimerController const& t, TimerController::State state, int timeoutMs = 2000)
+{
+    QElapsedTimer clock;
+    clock.start();
+    while (clock.elapsed() < timeoutMs)
+    {
+        if (t.state() == state)
+            return true;
+        QTest::qWait(10);
+    }
+    return t.state() == state;
+}
+} // namespace
+
 TEST_CASE("Hold past threshold reaches Armed, release starts Running, stop ends in Stopped", "[timer]")
 {
     TimerController t;
@@ -51,8 +50,7 @@ TEST_CASE("Hold past threshold reaches Armed, release starts Running, stop ends 
     QSignalSpy finished(&t, &TimerController::solveFinished);
 
     t.holdBegin();
-    QTest::qWait(150);
-    REQUIRE(t.state() == TimerController::State::Armed);
+    REQUIRE(waitForState(t, TimerController::State::Armed));
 
     t.holdEnd();
     REQUIRE(t.state() == TimerController::State::Running);
@@ -72,7 +70,7 @@ TEST_CASE("Reset returns to Idle from Stopped", "[timer]")
     TimerController t;
     t.setHoldMs(50);
     t.holdBegin();
-    QTest::qWait(100);
+    REQUIRE(waitForState(t, TimerController::State::Armed));
     t.holdEnd();
     QTest::qWait(30);
     t.stop();

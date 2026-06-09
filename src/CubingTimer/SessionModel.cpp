@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
-#include <CubingTimer/SessionModel.h>
-
 #include <chrono>
+
+#include <CubingTimer/SessionModel.hpp>
 
 using CubingCore::Penalty;
 using CubingCore::Puzzle;
@@ -10,7 +10,10 @@ using CubingCore::Solve;
 namespace CubingTimer
 {
 
-SessionModel::SessionModel(QObject* parent): QAbstractListModel(parent) {}
+SessionModel::SessionModel(QObject* parent):
+    QAbstractListModel(parent)
+{
+}
 
 void SessionModel::setStore(CubingCore::ISolveStore* store)
 {
@@ -56,45 +59,44 @@ QVariant SessionModel::data(QModelIndex const& index, int role) const
     if (row >= _solves.size())
         return {};
     auto const& s = _solves[row];
-    switch (role)
+    switch (static_cast<Roles>(role))
     {
-        case TimestampMsRole:
+        case Roles::TimestampMsRole:
             return QVariant::fromValue<qlonglong>(
-                std::chrono::duration_cast<std::chrono::milliseconds>(s.timestamp.time_since_epoch())
-                    .count());
-        case RawTimeMsRole: return QVariant::fromValue<qlonglong>(s.rawTime.count());
-        case EffectiveTimeMsRole:
-        {
+                std::chrono::duration_cast<std::chrono::milliseconds>(s.timestamp.time_since_epoch()).count());
+        case Roles::RawTimeMsRole:
+            return QVariant::fromValue<qlonglong>(s.rawTime.count());
+        case Roles::EffectiveTimeMsRole: {
             auto const t = s.effectiveTime();
-            return t ? QVariant::fromValue<qlonglong>(t->count())
-                     : QVariant::fromValue<qlonglong>(-1);
+            return t ? QVariant::fromValue<qlonglong>(t->count()) : QVariant::fromValue<qlonglong>(-1);
         }
-        case PenaltyRole: return static_cast<int>(s.penalty);
-        case ScrambleRole: return QString::fromStdString(s.scramble);
-        case CommentRole: return QString::fromStdString(s.comment);
-        case IdRole: return QVariant::fromValue<qlonglong>(s.id);
-        default: return {};
+        case Roles::PenaltyRole:
+            return static_cast<int>(s.penalty);
+        case Roles::ScrambleRole:
+            return QString::fromStdString(s.scramble);
+        case Roles::CommentRole:
+            return QString::fromStdString(s.comment);
+        case Roles::IdRole:
+            return QVariant::fromValue<qlonglong>(s.id);
     }
+    return {};
 }
 
 QHash<int, QByteArray> SessionModel::roleNames() const
 {
     return {
-        { TimestampMsRole, "timestampMs" },
-        { RawTimeMsRole, "rawTimeMs" },
-        { EffectiveTimeMsRole, "effectiveTimeMs" },
-        { PenaltyRole, "penalty" },
-        { ScrambleRole, "scramble" },
-        { CommentRole, "comment" },
-        { IdRole, "solveId" },
+        { static_cast<int>(Roles::TimestampMsRole), "timestampMs" },
+        { static_cast<int>(Roles::RawTimeMsRole), "rawTimeMs" },
+        { static_cast<int>(Roles::EffectiveTimeMsRole), "effectiveTimeMs" },
+        { static_cast<int>(Roles::PenaltyRole), "penalty" },
+        { static_cast<int>(Roles::ScrambleRole), "scramble" },
+        { static_cast<int>(Roles::CommentRole), "comment" },
+        { static_cast<int>(Roles::IdRole), "solveId" },
     };
 }
 
-void SessionModel::addSolve(qint64 rawMs,
-                            int penalty,
-                            QString const& scramble,
-                            qint64 inspectionMs,
-                            QString const& puzzleKey)
+void SessionModel::addSolve(
+    qint64 rawMs, int penalty, QString const& scramble, qint64 inspectionMs, QString const& puzzleKey)
 {
     if (!_store || _sessionId == 0)
         return;
@@ -129,7 +131,7 @@ void SessionModel::setLastPenalty(int penalty)
     (void) _store->updateSolve(last);
     auto const row = static_cast<int>(_solves.size() - 1);
     auto const idx = index(row);
-    emit dataChanged(idx, idx, { PenaltyRole, EffectiveTimeMsRole });
+    emit dataChanged(idx, idx, { static_cast<int>(Roles::PenaltyRole), static_cast<int>(Roles::EffectiveTimeMsRole) });
     emit solvesChanged();
 }
 

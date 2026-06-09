@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
-#include <CubingDB/InMemorySolveStore.h>
-#include <CubingDB/SqliteSolveStore.h>
-#include <CubingTimer/ProfileController.h>
-#include <CubingTimer/ScrambleProvider.h>
-#include <CubingTimer/SessionModel.h>
-#include <CubingTimer/StatsModel.h>
-#include <CubingTimer/TimerController.h>
+#include <memory>
 
+#include <CubingDB/InMemorySolveStore.hpp>
+#include <CubingDB/SqliteSolveStore.hpp>
+#include <CubingTimer/ProfileController.hpp>
+#include <CubingTimer/ScrambleProvider.hpp>
+#include <CubingTimer/SessionModel.hpp>
+#include <CubingTimer/StatsModel.hpp>
+#include <CubingTimer/TimerController.hpp>
 #include <QtCore/QDir>
 #include <QtCore/QStandardPaths>
 #include <QtGui/QGuiApplication>
@@ -14,24 +15,22 @@
 #include <QtQml/QQmlContext>
 #include <QtQuickControls2/QQuickStyle>
 
-#include <memory>
-
 namespace
 {
-    /// Picks a storage backend depending on platform. WASM gets the in-memory
-    /// store because the browser sandbox doesn't expose a real filesystem;
-    /// desktop / Android open a file under writable AppLocalData.
-    std::unique_ptr<CubingCore::ISolveStore> makeStore()
-    {
+/// Picks a storage backend depending on platform. WASM gets the in-memory
+/// store because the browser sandbox doesn't expose a real filesystem;
+/// desktop / Android open a file under writable AppLocalData.
+std::unique_ptr<CubingCore::ISolveStore> makeStore()
+{
 #ifdef Q_OS_WASM
-        return std::make_unique<CubingDB::InMemorySolveStore>();
+    return std::make_unique<CubingDB::InMemorySolveStore>();
 #else
-        auto const dir = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
-        QDir().mkpath(dir);
-        auto const path = QDir(dir).filePath(QStringLiteral("cubingtimer.sqlite"));
-        return std::make_unique<CubingDB::SqliteSolveStore>(path.toStdString());
+    auto const dir = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
+    QDir().mkpath(dir);
+    auto const path = QDir(dir).filePath(QStringLiteral("cubingtimer.sqlite"));
+    return std::make_unique<CubingDB::SqliteSolveStore>(path.toStdString());
 #endif
-    }
+}
 } // namespace
 
 int main(int argc, char* argv[])
@@ -50,29 +49,26 @@ int main(int argc, char* argv[])
     sessionModel.setStore(store.get());
     sessionModel.setSessionId(profileController.currentSessionId());
 
-    QObject::connect(&profileController, &CubingTimer::ProfileController::currentSessionChanged,
-                     &sessionModel, [&]() {
-                         sessionModel.setSessionId(profileController.currentSessionId());
-                     });
+    QObject::connect(&profileController, &CubingTimer::ProfileController::currentSessionChanged, &sessionModel, [&]() {
+        sessionModel.setSessionId(profileController.currentSessionId());
+    });
 
     CubingTimer::StatsModel statsModel;
     statsModel.setSource(&sessionModel);
 
     CubingTimer::ScrambleProvider scrambleProvider;
-    QObject::connect(&profileController, &CubingTimer::ProfileController::currentSessionChanged,
-                     &scrambleProvider, [&]() {
-                         scrambleProvider.setPuzzle(profileController.currentPuzzleKey());
-                     });
+    QObject::connect(&profileController, &CubingTimer::ProfileController::currentSessionChanged, &scrambleProvider, [&]() {
+        scrambleProvider.setPuzzle(profileController.currentPuzzleKey());
+    });
     scrambleProvider.setPuzzle(profileController.currentPuzzleKey());
 
     CubingTimer::TimerController timerController;
-    QObject::connect(&timerController, &CubingTimer::TimerController::solveFinished,
-                     &sessionModel, [&](qint64 rawMs, int penalty, qint64 inspectionMs) {
-                         sessionModel.addSolve(rawMs,
-                                               penalty,
-                                               scrambleProvider.current(),
-                                               inspectionMs,
-                                               scrambleProvider.puzzle());
+    QObject::connect(&timerController,
+                     &CubingTimer::TimerController::solveFinished,
+                     &sessionModel,
+                     [&](qint64 rawMs, int penalty, qint64 inspectionMs) {
+                         sessionModel.addSolve(
+                             rawMs, penalty, scrambleProvider.current(), inspectionMs, scrambleProvider.puzzle());
                          scrambleProvider.next();
                      });
 

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
-#include <CubingCore/Puzzle.h>
-
 #include <catch2/catch_test_macros.hpp>
+
+#include <CubingCore/Puzzle.hpp>
 
 using namespace CubingCore;
 

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-#include <CubingTimer/TimerController.h>
+#include <CubingTimer/TimerController.hpp>
 
 namespace CubingTimer
 {
@@ -11,7 +11,8 @@ namespace
     constexpr int UiTickIntervalMs = 16; // ~60Hz
 } // namespace
 
-TimerController::TimerController(QObject* parent): QObject(parent)
+TimerController::TimerController(QObject* parent):
+    QObject(parent)
 {
     _holdArmTimer.setSingleShot(true);
     connect(&_holdArmTimer, &QTimer::timeout, this, &TimerController::onHoldTimerTimeout);
@@ -24,9 +25,12 @@ qint64 TimerController::elapsedMs() const noexcept
 {
     switch (_state)
     {
-        case State::Running: return _solveTimer.isValid() ? _solveTimer.elapsed() : 0;
-        case State::Stopped: return _lastSolveMs;
-        default: return 0;
+        case State::Running:
+            return _solveTimer.isValid() ? _solveTimer.elapsed() : 0;
+        case State::Stopped:
+            return _lastSolveMs;
+        default:
+            return 0;
     }
 }
 
@@ -39,8 +43,10 @@ int TimerController::inspectionElapsedMs() const noexcept
         case State::Armed:
             return _inspectionTimer.isValid() ? static_cast<int>(_inspectionTimer.elapsed()) : 0;
         case State::Running:
-        case State::Stopped: return static_cast<int>(_lastInspectionMs);
-        default: return 0;
+        case State::Stopped:
+            return static_cast<int>(_lastInspectionMs);
+        default:
+            return 0;
     }
 }
 
@@ -148,9 +154,7 @@ void TimerController::stop()
 
     enter(State::Stopped);
     emit elapsedChanged();
-    emit solveFinished(_lastSolveMs,
-                       static_cast<int>(_pendingPenalty),
-                       _inspectionEnabled ? _lastInspectionMs : 0);
+    emit solveFinished(_lastSolveMs, static_cast<int>(_pendingPenalty), _inspectionEnabled ? _lastInspectionMs : 0);
 }
 
 void TimerController::reset()

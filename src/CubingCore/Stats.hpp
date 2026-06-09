@@ -1,18 +1,21 @@
 // SPDX-License-Identifier: Apache-2.0
 #pragma once
 
-#include <CubingCore/Solve.h>
-
 #include <chrono>
+#include <cstddef>
+#include <cstdint>
 #include <expected>
 #include <optional>
 #include <span>
+#include <vector>
+
+#include <CubingCore/Solve.hpp>
 
 namespace CubingCore::stats
 {
 
 /// Why a statistic could not be computed.
-enum class StatsError
+enum class StatsError : std::uint8_t
 {
     NotEnoughSolves, ///< fewer solves than the window size
     AllDnf,          ///< the relevant window is all-DNF / can't be averaged
@@ -23,7 +26,10 @@ struct AverageResult
 {
     std::optional<Milliseconds> value; ///< nullopt ⇒ DNF average
 
-    [[nodiscard]] bool isDnf() const noexcept { return !value.has_value(); }
+    [[nodiscard]] bool isDnf() const noexcept
+    {
+        return !value.has_value();
+    }
 };
 
 /// Best single (effective time, +2 applied) across the given solves.
@@ -45,22 +51,19 @@ struct AverageResult
 /// @param solves source solves (most recent at the tail).
 /// @param n      window size.
 /// @return trimmed mean, DNF, or `NotEnoughSolves`.
-[[nodiscard]] std::expected<AverageResult, StatsError> averageOfLast(std::span<Solve const> solves,
-                                                                      std::size_t n);
+[[nodiscard]] std::expected<AverageResult, StatsError> averageOfLast(std::span<Solve const> solves, std::size_t n);
 
 /// The best AoN over any window in the entire history (PB Ao5, etc.).
 /// @param solves source solves.
 /// @param n      window size.
 /// @return best trimmed mean, or DNF/`NotEnoughSolves`.
-[[nodiscard]] std::expected<AverageResult, StatsError> bestAverageOf(std::span<Solve const> solves,
-                                                                      std::size_t n);
+[[nodiscard]] std::expected<AverageResult, StatsError> bestAverageOf(std::span<Solve const> solves, std::size_t n);
 
 /// The best mean-of-n over any window in the entire history.
 /// @param solves source solves.
 /// @param n      window size.
 /// @return best arithmetic mean, or DNF/`NotEnoughSolves`.
-[[nodiscard]] std::expected<AverageResult, StatsError> bestMeanOf(std::span<Solve const> solves,
-                                                                   std::size_t n);
+[[nodiscard]] std::expected<AverageResult, StatsError> bestMeanOf(std::span<Solve const> solves, std::size_t n);
 
 /// Filters solves to a rolling window ending at `now`. Solves with
 /// `timestamp >= now - days*86400s` are kept; input ordering is preserved.
@@ -68,8 +71,6 @@ struct AverageResult
 /// @param now    end of the window (exclusive upper bound is open).
 /// @param days   length of the window in days.
 /// @return solves whose timestamps fall in the window.
-[[nodiscard]] std::vector<Solve> filterLastDays(std::span<Solve const> solves,
-                                                Timestamp now,
-                                                int days);
+[[nodiscard]] std::vector<Solve> filterLastDays(std::span<Solve const> solves, Timestamp now, int days);
 
 } // namespace CubingCore::stats

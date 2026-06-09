@@ -1,18 +1,19 @@
 // SPDX-License-Identifier: Apache-2.0
 #pragma once
 
-#include <CubingCore/Solve.h>
-
+#include <cstdint>
 #include <expected>
 #include <span>
 #include <string>
 #include <string_view>
 #include <vector>
 
+#include <CubingCore/Solve.hpp>
+
 namespace CubingCore::csv
 {
 
-enum class CsvError
+enum class CsvError : std::uint8_t
 {
     Malformed,
     UnknownPuzzle,

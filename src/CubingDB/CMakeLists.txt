@@ -21,8 +21,9 @@ set_target_properties(CubingDB PROPERTIES
 
 if(CUBINGTIMER_TESTING)
     add_executable(CubingDB_test
+        ${CMAKE_SOURCE_DIR}/src/test_main.cpp
         SqliteSolveStore_test.cpp
     )
-    target_link_libraries(CubingDB_test PRIVATE CubingDB Catch2::Catch2WithMain)
+    target_link_libraries(CubingDB_test PRIVATE CubingDB Catch2::Catch2)
     add_test(NAME CubingDB_test COMMAND CubingDB_test)
 endif()

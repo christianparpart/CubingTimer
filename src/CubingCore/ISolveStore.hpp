@@ -1,25 +1,25 @@
 // SPDX-License-Identifier: Apache-2.0
 #pragma once
 
-#include <CubingCore/Profile.h>
-#include <CubingCore/Session.h>
-#include <CubingCore/Solve.h>
-
 #include <cstdint>
 #include <expected>
 #include <string>
 #include <string_view>
 #include <vector>
 
+#include <CubingCore/Profile.hpp>
+#include <CubingCore/Session.hpp>
+#include <CubingCore/Solve.hpp>
+
 namespace CubingCore
 {
 
 /// Reasons a store call may fail. Kept abstract so different backends (SQLite,
 /// in-memory, future cloud) can map their errors uniformly.
-enum class StoreError
+enum class StoreError : std::uint8_t
 {
     NotFound,
-    Backend,        ///< underlying storage reported an error
+    Backend, ///< underlying storage reported an error
     InvalidArgument,
 };
 
@@ -28,6 +28,11 @@ enum class StoreError
 class ISolveStore
 {
   public:
+    ISolveStore() = default;
+    ISolveStore(ISolveStore const&) = delete;
+    ISolveStore(ISolveStore&&) = delete;
+    ISolveStore& operator=(ISolveStore const&) = delete;
+    ISolveStore& operator=(ISolveStore&&) = delete;
     virtual ~ISolveStore() = default;
 
     // --- profiles ---
@@ -50,13 +55,12 @@ class ISolveStore
     /// @param puzzle    puzzle this session records solves for.
     /// @return the created session with `id` populated, or a StoreError.
     [[nodiscard]] virtual std::expected<Session, StoreError> createSession(std::int64_t profileId,
-                                                                            std::string_view name,
-                                                                            Puzzle puzzle) = 0;
+                                                                           std::string_view name,
+                                                                           Puzzle puzzle) = 0;
     /// Lists the sessions of a profile in insertion order.
     /// @param profileId owning profile.
     /// @return the sessions, or a StoreError.
-    [[nodiscard]] virtual std::expected<std::vector<Session>, StoreError>
-        listSessions(std::int64_t profileId) = 0;
+    [[nodiscard]] virtual std::expected<std::vector<Session>, StoreError> listSessions(std::int64_t profileId) = 0;
     /// Deletes a session; cascades to its solves.
     /// @param sessionId id of the session to delete.
     /// @return void on success; NotFound if no row matched.
@@ -78,8 +82,7 @@ class ISolveStore
     /// Loads all solves of a session in chronological order.
     /// @param sessionId session whose solves to load.
     /// @return the solves, or a StoreError.
-    [[nodiscard]] virtual std::expected<std::vector<Solve>, StoreError>
-        loadSession(std::int64_t sessionId) = 0;
+    [[nodiscard]] virtual std::expected<std::vector<Solve>, StoreError> loadSession(std::int64_t sessionId) = 0;
 };
 
 } // namespace CubingCore

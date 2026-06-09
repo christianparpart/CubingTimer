@@ -37,14 +37,14 @@ Frame {
 
         Label { text: qsTr("90-day"); font.italic: true }
         Label { text: ""; font.italic: true }
-        Label { text: statsModel.best90d; font.italic: true }
+        Label { text: statsModel.bestLast90Days; font.italic: true }
 
         Label { text: qsTr("90-day Ao5"); font.italic: true }
         Label { text: ""; font.italic: true }
-        Label { text: statsModel.bestAo5_90d; font.italic: true }
+        Label { text: statsModel.bestAo5Last90Days; font.italic: true }
 
         Label { text: qsTr("90-day Ao12"); font.italic: true }
         Label { text: ""; font.italic: true }
-        Label { text: statsModel.bestAo12_90d; font.italic: true }
+        Label { text: statsModel.bestAo12Last90Days; font.italic: true }
     }
 }

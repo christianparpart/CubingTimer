@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 #pragma once
 
-#include <CubingCore/ISolveStore.h>
-#include <CubingCore/Profile.h>
-#include <CubingCore/Session.h>
-
+#include <CubingCore/ISolveStore.hpp>
+#include <CubingCore/Profile.hpp>
+#include <CubingCore/Session.hpp>
 #include <QtCore/QObject>
 #include <QtCore/QString>
 #include <QtCore/QStringList>
@@ -35,9 +34,18 @@ class ProfileController: public QObject
 
     [[nodiscard]] QStringList profileNames() const;
     [[nodiscard]] QVariantList sessions() const;
-    [[nodiscard]] qint64 currentProfileId() const noexcept { return _currentProfile.id; }
-    [[nodiscard]] qint64 currentSessionId() const noexcept { return _currentSession.id; }
-    [[nodiscard]] QString currentProfileName() const { return QString::fromStdString(_currentProfile.name); }
+    [[nodiscard]] qint64 currentProfileId() const noexcept
+    {
+        return _currentProfile.id;
+    }
+    [[nodiscard]] qint64 currentSessionId() const noexcept
+    {
+        return _currentSession.id;
+    }
+    [[nodiscard]] QString currentProfileName() const
+    {
+        return QString::fromStdString(_currentProfile.name);
+    }
     [[nodiscard]] QString currentPuzzleKey() const;
 
   public slots:

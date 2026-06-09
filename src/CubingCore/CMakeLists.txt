@@ -17,6 +17,7 @@ set_target_properties(CubingCore PROPERTIES
 
 if(CUBINGTIMER_TESTING)
     add_executable(CubingCore_test
+        ${CMAKE_SOURCE_DIR}/src/test_main.cpp
         Scrambler_test.cpp
         Solve_test.cpp
         Stats_test.cpp
@@ -24,6 +25,6 @@ if(CUBINGTIMER_TESTING)
         JsonIo_test.cpp
         Puzzle_test.cpp
     )
-    target_link_libraries(CubingCore_test PRIVATE CubingCore Catch2::Catch2WithMain)
+    target_link_libraries(CubingCore_test PRIVATE CubingCore Qt6::Core Catch2::Catch2)
     add_test(NAME CubingCore_test COMMAND CubingCore_test)
 endif()

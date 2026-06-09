@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
-#include <CubingCore/Stats.h>
-
 #include <catch2/catch_test_macros.hpp>
+
+#include <CubingCore/Stats.hpp>
 
 using namespace CubingCore;
 using namespace CubingCore::stats;
@@ -9,13 +9,13 @@ using namespace std::chrono_literals;
 
 namespace
 {
-    Solve mk(int rawMs, Penalty penalty = Penalty::Ok)
-    {
-        Solve s;
-        s.rawTime = Milliseconds { rawMs };
-        s.penalty = penalty;
-        return s;
-    }
+Solve mk(int rawMs, Penalty penalty = Penalty::Ok)
+{
+    Solve s;
+    s.rawTime = Milliseconds { rawMs };
+    s.penalty = penalty;
+    return s;
+}
 } // namespace
 
 TEST_CASE("best returns NotEnoughSolves on empty", "[stats]")
@@ -51,7 +51,7 @@ TEST_CASE("meanOfLast Mo3 — all OK averages cleanly", "[stats]")
     auto const m = meanOfLast(solves, 3);
     REQUIRE(m.has_value());
     REQUIRE_FALSE(m->isDnf());
-    REQUIRE(m->value == std::optional{ 11'000ms });
+    REQUIRE(m->value == std::optional { 11'000ms });
 }
 
 TEST_CASE("meanOfLast returns NotEnoughSolves under window size", "[stats]")
@@ -69,7 +69,7 @@ TEST_CASE("averageOfLast Ao5 trims best+worst (no DNFs)", "[stats]")
     auto const r = averageOfLast(solves, 5);
     REQUIRE(r.has_value());
     REQUIRE_FALSE(r->isDnf());
-    REQUIRE(r->value == std::optional{ 11'000ms });
+    REQUIRE(r->value == std::optional { 11'000ms });
 }
 
 TEST_CASE("averageOfLast Ao5 with one DNF — DNF counts as the worst (trimmed)", "[stats]")
@@ -81,7 +81,7 @@ TEST_CASE("averageOfLast Ao5 with one DNF — DNF counts as the worst (trimmed)"
     auto const r = averageOfLast(solves, 5);
     REQUIRE(r.has_value());
     REQUIRE_FALSE(r->isDnf());
-    REQUIRE(r->value == std::optional{ 11'000ms });
+    REQUIRE(r->value == std::optional { 11'000ms });
 }
 
 TEST_CASE("averageOfLast Ao5 with two DNFs → DNF", "[stats]")
@@ -104,7 +104,7 @@ TEST_CASE("averageOfLast applies +2 before trimming", "[stats]")
     auto const r = averageOfLast(solves, 5);
     REQUIRE(r.has_value());
     REQUIRE_FALSE(r->isDnf());
-    REQUIRE(r->value == std::optional{ 11'000ms });
+    REQUIRE(r->value == std::optional { 11'000ms });
 }
 
 TEST_CASE("averageOfLast Ao12 trim is 1 per side", "[stats]")
@@ -117,7 +117,7 @@ TEST_CASE("averageOfLast Ao12 trim is 1 per side", "[stats]")
     auto const r = averageOfLast(solves, 12);
     REQUIRE(r.has_value());
     REQUIRE_FALSE(r->isDnf());
-    REQUIRE(r->value == std::optional{ 15'500ms });
+    REQUIRE(r->value == std::optional { 15'500ms });
 }
 
 TEST_CASE("averageOfLast Ao100 trim is 5 per side", "[stats]")
@@ -131,7 +131,7 @@ TEST_CASE("averageOfLast Ao100 trim is 5 per side", "[stats]")
     auto const r = averageOfLast(solves, 100);
     REQUIRE(r.has_value());
     REQUIRE_FALSE(r->isDnf());
-    REQUIRE(r->value == std::optional{ 50ms });
+    REQUIRE(r->value == std::optional { 50ms });
 }
 
 TEST_CASE("bestAverageOf finds the best window", "[stats]")
@@ -142,8 +142,8 @@ TEST_CASE("bestAverageOf finds the best window", "[stats]")
     };
     // first  window [0..4]: trim → {20,20,20} → 20s
     // second window [1..5]: trim min=5 and max=20, mean({20,20,20}) = 20s — wait, identical
-    // Make it tilt: change last entry to 1ms? Already does — they tie because everything is 20s except the new 5s extreme that gets trimmed.
-    // Adjust to make the second strictly better:
+    // Make it tilt: change last entry to 1ms? Already does — they tie because everything is 20s except the new 5s extreme
+    // that gets trimmed. Adjust to make the second strictly better:
     solves = std::vector<Solve> {
         mk(30'000), mk(20'000), mk(20'000), mk(20'000), mk(20'000), mk(10'000),
     };
@@ -152,7 +152,7 @@ TEST_CASE("bestAverageOf finds the best window", "[stats]")
     REQUIRE_FALSE(r->isDnf());
     // window [1..5]: values 20,20,20,20,10 → trim 10 and 20, mean({20,20,20}) = 20s
     // window [0..4]: values 30,20,20,20,20 → trim 20 and 30, mean({20,20,20}) = 20s
-    REQUIRE(r->value == std::optional{ 20'000ms });
+    REQUIRE(r->value == std::optional { 20'000ms });
 }
 
 TEST_CASE("filterLastDays keeps recent solves only", "[stats]")

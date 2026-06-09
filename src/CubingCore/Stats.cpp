@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
-#include <CubingCore/Stats.h>
-
 #include <algorithm>
 #include <numeric>
 #include <ranges>
+#include <vector>
+
+#include <CubingCore/Stats.hpp>
 
 namespace CubingCore::stats
 {

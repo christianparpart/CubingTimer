@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 #pragma once
 
-#include <CubingCore/Puzzle.h>
-
 #include <cstdint>
 #include <functional>
 #include <string>
 #include <vector>
+
+#include <CubingCore/Puzzle.hpp>
 
 namespace CubingCore
 {

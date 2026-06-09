@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 #pragma once
 
-#include <CubingCore/Solve.h>
+#include <cstdint>
 
+#include <CubingCore/Solve.hpp>
 #include <QtCore/QElapsedTimer>
 #include <QtCore/QObject>
 #include <QtCore/QTimer>
@@ -29,34 +30,45 @@ class TimerController: public QObject
     Q_PROPERTY(State state READ state NOTIFY stateChanged)
     Q_PROPERTY(qint64 elapsedMs READ elapsedMs NOTIFY elapsedChanged)
     Q_PROPERTY(int holdMs READ holdMs WRITE setHoldMs NOTIFY holdMsChanged)
-    Q_PROPERTY(bool inspectionEnabled READ inspectionEnabled WRITE setInspectionEnabled
-                   NOTIFY inspectionEnabledChanged)
+    Q_PROPERTY(bool inspectionEnabled READ inspectionEnabled WRITE setInspectionEnabled NOTIFY inspectionEnabledChanged)
     Q_PROPERTY(int inspectionElapsedMs READ inspectionElapsedMs NOTIFY elapsedChanged)
     Q_PROPERTY(CubingCore::Penalty pendingPenalty READ pendingPenalty NOTIFY pendingPenaltyChanged)
 
   public:
-    enum class State
+    enum class State : std::uint8_t
     {
         Idle,
-        InspectionPending,    ///< user has tapped to start inspection but not yet released
-        InspectionRunning,    ///< 15s WCA inspection is ticking
-        HoldPending,          ///< spacebar pressed, not yet held long enough
-        Armed,                ///< held long enough; release will start the run
-        Running,              ///< timer is running
-        Stopped,              ///< just finished a solve; awaits acknowledgement
+        InspectionPending, ///< user has tapped to start inspection but not yet released
+        InspectionRunning, ///< 15s WCA inspection is ticking
+        HoldPending,       ///< spacebar pressed, not yet held long enough
+        Armed,             ///< held long enough; release will start the run
+        Running,           ///< timer is running
+        Stopped,           ///< just finished a solve; awaits acknowledgement
     };
     Q_ENUM(State)
 
     explicit TimerController(QObject* parent = nullptr);
 
-    [[nodiscard]] State state() const noexcept { return _state; }
+    [[nodiscard]] State state() const noexcept
+    {
+        return _state;
+    }
     [[nodiscard]] qint64 elapsedMs() const noexcept;
-    [[nodiscard]] int holdMs() const noexcept { return _holdMs; }
+    [[nodiscard]] int holdMs() const noexcept
+    {
+        return _holdMs;
+    }
     void setHoldMs(int ms);
-    [[nodiscard]] bool inspectionEnabled() const noexcept { return _inspectionEnabled; }
+    [[nodiscard]] bool inspectionEnabled() const noexcept
+    {
+        return _inspectionEnabled;
+    }
     void setInspectionEnabled(bool enabled);
     [[nodiscard]] int inspectionElapsedMs() const noexcept;
-    [[nodiscard]] CubingCore::Penalty pendingPenalty() const noexcept { return _pendingPenalty; }
+    [[nodiscard]] CubingCore::Penalty pendingPenalty() const noexcept
+    {
+        return _pendingPenalty;
+    }
 
   public slots:
     /// Press event (spacebar down or finger touch). Drives Idle→HoldPending or

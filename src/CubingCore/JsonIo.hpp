@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 #pragma once
 
-#include <CubingCore/Solve.h>
-
 #include <array>
 #include <cstdint>
 #include <expected>
@@ -10,6 +8,8 @@
 #include <string>
 #include <string_view>
 #include <vector>
+
+#include <CubingCore/Solve.hpp>
 
 namespace CubingCore::json
 {

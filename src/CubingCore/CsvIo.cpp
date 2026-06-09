@@ -1,17 +1,16 @@
 // SPDX-License-Identifier: Apache-2.0
-#include <CubingCore/CsvIo.h>
-
 #include <charconv>
 #include <ranges>
 #include <sstream>
+
+#include <CubingCore/CsvIo.hpp>
 
 namespace CubingCore::csv
 {
 
 namespace
 {
-    constexpr std::string_view CsvHeader =
-        "timestamp_ms,puzzle,raw_time_ms,penalty,scramble,comment,inspection_ms";
+    constexpr std::string_view CsvHeader = "timestamp_ms,puzzle,raw_time_ms,penalty,scramble,comment,inspection_ms";
 
     std::string puzzleKey(Puzzle p)
     {
@@ -22,18 +21,24 @@ namespace
     {
         switch (p)
         {
-            case Penalty::Ok: return "OK";
-            case Penalty::PlusTwo: return "+2";
-            case Penalty::Dnf: return "DNF";
+            case Penalty::Ok:
+                return "OK";
+            case Penalty::PlusTwo:
+                return "+2";
+            case Penalty::Dnf:
+                return "DNF";
         }
         return "OK";
     }
 
     std::expected<Penalty, CsvError> parsePenalty(std::string_view s)
     {
-        if (s == "OK") return Penalty::Ok;
-        if (s == "+2") return Penalty::PlusTwo;
-        if (s == "DNF") return Penalty::Dnf;
+        if (s == "OK")
+            return Penalty::Ok;
+        if (s == "+2")
+            return Penalty::PlusTwo;
+        if (s == "DNF")
+            return Penalty::Dnf;
         return std::unexpected(CsvError::UnknownPenalty);
     }
 
@@ -41,8 +46,7 @@ namespace
     /// contains delimiter, quote or newline.
     std::string escape(std::string_view field)
     {
-        bool const needsQuote =
-            field.find_first_of(",\"\n\r") != std::string_view::npos;
+        bool const needsQuote = field.find_first_of(",\"\n\r") != std::string_view::npos;
         if (!needsQuote)
             return std::string(field);
         std::string out;
@@ -115,12 +119,9 @@ std::string toCsv(std::span<Solve const> solves)
     out << CsvHeader << '\n';
     for (auto const& s: solves)
     {
-        auto const ms = std::chrono::duration_cast<std::chrono::milliseconds>(
-                            s.timestamp.time_since_epoch())
-                            .count();
-        out << ms << ',' << puzzleKey(s.puzzle) << ',' << s.rawTime.count() << ','
-            << penaltyKey(s.penalty) << ',' << escape(s.scramble) << ','
-            << escape(s.comment) << ',';
+        auto const ms = std::chrono::duration_cast<std::chrono::milliseconds>(s.timestamp.time_since_epoch()).count();
+        out << ms << ',' << puzzleKey(s.puzzle) << ',' << s.rawTime.count() << ',' << penaltyKey(s.penalty) << ','
+            << escape(s.scramble) << ',' << escape(s.comment) << ',';
         if (s.inspection)
             out << s.inspection->count();
         out << '\n';

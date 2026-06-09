@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 #pragma once
 
-#include <CubingDB/SqliteSolveStore.h>
+#include <CubingDB/SqliteSolveStore.hpp>
 
 namespace CubingDB
 {
@@ -11,7 +11,10 @@ namespace CubingDB
 class InMemorySolveStore final: public SqliteSolveStore
 {
   public:
-    InMemorySolveStore(): SqliteSolveStore(":memory:") {}
+    InMemorySolveStore():
+        SqliteSolveStore(":memory:")
+    {
+    }
 };
 
 } // namespace CubingDB

@@ -54,16 +54,19 @@ qt_standard_project_setup(REQUIRES ${QT_MIN_VERSION})
 # Testing -----------------------------------------------------------------
 if(CUBINGTIMER_TESTING)
     enable_testing()
+    # Prefer a system-provided Catch2 (faster, cached by package manager).
+    # Fall back to CPM if not installed, which downloads and pins the release.
     find_package(Catch2 3 QUIET)
     if(NOT Catch2_FOUND)
-        message(STATUS "Catch2 not found via find_package, fetching via FetchContent")
-        include(FetchContent)
-        FetchContent_Declare(
-            Catch2
-            GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-            GIT_TAG v3.5.4
+        message(STATUS "Catch2 not found via find_package, fetching via CPM")
+        include(cmake/CPM.cmake)
+        CPMAddPackage(
+            NAME Catch2
+            GITHUB_REPOSITORY catchorg/Catch2
+            VERSION 3.5.4
+            EXCLUDE_FROM_ALL YES
+            SYSTEM YES
         )
-        FetchContent_MakeAvailable(Catch2)
     endif()
 endif()
 

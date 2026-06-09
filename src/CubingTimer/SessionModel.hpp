@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 #pragma once
 
-#include <CubingCore/ISolveStore.h>
-#include <CubingCore/Solve.h>
+#include <cstdint>
+#include <vector>
 
+#include <CubingCore/ISolveStore.hpp>
+#include <CubingCore/Solve.hpp>
 #include <QtCore/QAbstractListModel>
 #include <QtQml/QQmlEngine>
-
-#include <vector>
 
 namespace CubingTimer
 {
@@ -24,7 +24,7 @@ class SessionModel: public QAbstractListModel
     Q_PROPERTY(int count READ rowCount NOTIFY countChanged)
 
   public:
-    enum Roles
+    enum class Roles : std::uint16_t
     {
         TimestampMsRole = Qt::UserRole + 1,
         RawTimeMsRole,
@@ -40,7 +40,10 @@ class SessionModel: public QAbstractListModel
     /// Injects the store. Must be set before any session is loaded.
     void setStore(CubingCore::ISolveStore* store);
 
-    [[nodiscard]] qint64 sessionId() const noexcept { return _sessionId; }
+    [[nodiscard]] qint64 sessionId() const noexcept
+    {
+        return _sessionId;
+    }
     void setSessionId(qint64 sessionId);
 
     // QAbstractListModel
@@ -49,7 +52,10 @@ class SessionModel: public QAbstractListModel
     [[nodiscard]] QHash<int, QByteArray> roleNames() const override;
 
     /// Returns a copy of the loaded solves — used by StatsModel for computations.
-    [[nodiscard]] std::vector<CubingCore::Solve> const& solves() const noexcept { return _solves; }
+    [[nodiscard]] std::vector<CubingCore::Solve> const& solves() const noexcept
+    {
+        return _solves;
+    }
 
   public slots:
     /// Records a new solve for the currently active session.

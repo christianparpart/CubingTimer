@@ -1,13 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 #pragma once
 
-#include <CubingCore/Puzzle.h>
+#include <random>
 
+#include <CubingCore/Puzzle.hpp>
 #include <QtCore/QObject>
 #include <QtCore/QString>
 #include <QtQml/QQmlEngine>
-
-#include <random>
 
 namespace CubingTimer
 {
@@ -27,7 +26,10 @@ class ScrambleProvider: public QObject
     [[nodiscard]] QString puzzle() const;
     void setPuzzle(QString const& key);
 
-    [[nodiscard]] QString current() const { return _current; }
+    [[nodiscard]] QString current() const
+    {
+        return _current;
+    }
 
   public slots:
     /// Generates a new scramble for the active puzzle and updates `current`.

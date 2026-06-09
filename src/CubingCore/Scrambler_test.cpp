@@ -1,20 +1,22 @@
 // SPDX-License-Identifier: Apache-2.0
-#include <CubingCore/Scrambler.h>
-
 #include <catch2/catch_test_macros.hpp>
 
 #include <random>
+
+#include <CubingCore/Scrambler.hpp>
 
 using namespace CubingCore;
 
 namespace
 {
-    /// Builds a seeded RNG for deterministic tests.
-    RandomFn seededRng(std::uint32_t seed)
-    {
-        auto engine = std::make_shared<std::mt19937>(seed);
-        return [engine]() { return (*engine)(); };
-    }
+/// Builds a seeded RNG for deterministic tests.
+RandomFn seededRng(std::uint32_t seed)
+{
+    auto engine = std::make_shared<std::mt19937>(seed);
+    return [engine]() {
+        return (*engine)();
+    };
+}
 } // namespace
 
 TEST_CASE("Scrambler produces moves of the requested length", "[scrambler]")

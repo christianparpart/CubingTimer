@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
-#include <CubingCore/JsonIo.h>
-
 #include <charconv>
 #include <sstream>
+
+#include <CubingCore/JsonIo.hpp>
 
 namespace CubingCore::json
 {
@@ -18,9 +18,12 @@ namespace
     {
         switch (p)
         {
-            case Penalty::Ok: return "OK";
-            case Penalty::PlusTwo: return "+2";
-            case Penalty::Dnf: return "DNF";
+            case Penalty::Ok:
+                return "OK";
+            case Penalty::PlusTwo:
+                return "+2";
+            case Penalty::Dnf:
+                return "DNF";
         }
         return "OK";
     }
@@ -33,11 +36,21 @@ namespace
         {
             switch (c)
             {
-                case '"': out.append(R"(\")"); break;
-                case '\\': out.append(R"(\\)"); break;
-                case '\n': out.append(R"(\n)"); break;
-                case '\r': out.append(R"(\r)"); break;
-                case '\t': out.append(R"(\t)"); break;
+                case '"':
+                    out.append(R"(\")");
+                    break;
+                case '\\':
+                    out.append(R"(\\)");
+                    break;
+                case '\n':
+                    out.append(R"(\n)");
+                    break;
+                case '\r':
+                    out.append(R"(\r)");
+                    break;
+                case '\t':
+                    out.append(R"(\t)");
+                    break;
                 default:
                     if (static_cast<unsigned char>(c) < 0x20)
                     {
@@ -59,8 +72,14 @@ namespace
         std::string_view text;
         std::size_t pos = 0;
 
-        [[nodiscard]] bool eof() const noexcept { return pos >= text.size(); }
-        [[nodiscard]] char peek() const noexcept { return eof() ? '\0' : text[pos]; }
+        [[nodiscard]] bool eof() const noexcept
+        {
+            return pos >= text.size();
+        }
+        [[nodiscard]] char peek() const noexcept
+        {
+            return eof() ? '\0' : text[pos];
+        }
 
         void skipWs() noexcept
         {
@@ -104,12 +123,24 @@ namespace
                 ++c.pos;
                 switch (esc)
                 {
-                    case '"': out.push_back('"'); break;
-                    case '\\': out.push_back('\\'); break;
-                    case '/': out.push_back('/'); break;
-                    case 'n': out.push_back('\n'); break;
-                    case 'r': out.push_back('\r'); break;
-                    case 't': out.push_back('\t'); break;
+                    case '"':
+                        out.push_back('"');
+                        break;
+                    case '\\':
+                        out.push_back('\\');
+                        break;
+                    case '/':
+                        out.push_back('/');
+                        break;
+                    case 'n':
+                        out.push_back('\n');
+                        break;
+                    case 'r':
+                        out.push_back('\r');
+                        break;
+                    case 't':
+                        out.push_back('\t');
+                        break;
                     case 'u':
                         if (c.pos + 4 > c.text.size())
                             return std::unexpected(JsonError::Malformed);
@@ -136,7 +167,8 @@ namespace
                                 return std::unexpected(JsonError::Malformed);
                         }
                         break;
-                    default: return std::unexpected(JsonError::Malformed);
+                    default:
+                        return std::unexpected(JsonError::Malformed);
                 }
             }
             else
@@ -190,14 +222,16 @@ namespace
         if (key == "timestamp_ms")
         {
             auto const v = readInt(c);
-            if (!v) return std::unexpected(v.error());
+            if (!v)
+                return std::unexpected(v.error());
             s.timestamp = Timestamp { Milliseconds { *v } };
             return {};
         }
         if (key == "puzzle")
         {
             auto const v = readString(c);
-            if (!v) return std::unexpected(v.error());
+            if (!v)
+                return std::unexpected(v.error());
             if (*v != "222" && *v != "333" && *v != "444")
                 return std::unexpected(JsonError::Malformed);
             s.puzzle = puzzleFromKey(*v);
@@ -206,40 +240,51 @@ namespace
         if (key == "raw_time_ms")
         {
             auto const v = readInt(c);
-            if (!v) return std::unexpected(v.error());
+            if (!v)
+                return std::unexpected(v.error());
             s.rawTime = Milliseconds { *v };
             return {};
         }
         if (key == "penalty")
         {
             auto const v = readString(c);
-            if (!v) return std::unexpected(v.error());
-            if (*v == "OK") s.penalty = Penalty::Ok;
-            else if (*v == "+2") s.penalty = Penalty::PlusTwo;
-            else if (*v == "DNF") s.penalty = Penalty::Dnf;
-            else return std::unexpected(JsonError::Malformed);
+            if (!v)
+                return std::unexpected(v.error());
+            if (*v == "OK")
+                s.penalty = Penalty::Ok;
+            else if (*v == "+2")
+                s.penalty = Penalty::PlusTwo;
+            else if (*v == "DNF")
+                s.penalty = Penalty::Dnf;
+            else
+                return std::unexpected(JsonError::Malformed);
             return {};
         }
         if (key == "scramble")
         {
             auto const v = readString(c);
-            if (!v) return std::unexpected(v.error());
+            if (!v)
+                return std::unexpected(v.error());
             s.scramble = *v;
             return {};
         }
         if (key == "comment")
         {
             auto const v = readString(c);
-            if (!v) return std::unexpected(v.error());
+            if (!v)
+                return std::unexpected(v.error());
             s.comment = *v;
             return {};
         }
         if (key == "inspection_ms")
         {
             auto const v = readIntOrNull(c);
-            if (!v) return std::unexpected(v.error());
-            if (*v) s.inspection = Milliseconds { **v };
-            else s.inspection.reset();
+            if (!v)
+                return std::unexpected(v.error());
+            if (*v)
+                s.inspection = Milliseconds { **v };
+            else
+                s.inspection.reset();
             return {};
         }
         return std::unexpected(JsonError::UnknownField);
@@ -262,7 +307,8 @@ namespace
             firstField = false;
 
             auto const key = readString(c);
-            if (!key) return std::unexpected(key.error());
+            if (!key)
+                return std::unexpected(key.error());
             if (!c.consume(':'))
                 return std::unexpected(JsonError::Malformed);
             c.skipWs();
@@ -282,12 +328,10 @@ std::string toJson(std::span<Solve const> solves)
         if (!first)
             out << ',';
         first = false;
-        auto const ts =
-            std::chrono::duration_cast<std::chrono::milliseconds>(s.timestamp.time_since_epoch()).count();
-        out << R"({"timestamp_ms":)" << ts << R"(,"puzzle":")" << puzzleKey(s.puzzle)
-            << R"(","raw_time_ms":)" << s.rawTime.count() << R"(,"penalty":")" << penaltyKey(s.penalty)
-            << R"(","scramble":")" << escape(s.scramble) << R"(","comment":")" << escape(s.comment)
-            << R"(","inspection_ms":)";
+        auto const ts = std::chrono::duration_cast<std::chrono::milliseconds>(s.timestamp.time_since_epoch()).count();
+        out << R"({"timestamp_ms":)" << ts << R"(,"puzzle":")" << puzzleKey(s.puzzle) << R"(","raw_time_ms":)"
+            << s.rawTime.count() << R"(,"penalty":")" << penaltyKey(s.penalty) << R"(","scramble":")" << escape(s.scramble)
+            << R"(","comment":")" << escape(s.comment) << R"(","inspection_ms":)";
         if (s.inspection)
             out << s.inspection->count();
         else

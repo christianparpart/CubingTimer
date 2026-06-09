@@ -12,9 +12,9 @@ namespace CubingCore
 /// Enumeration of supported cubing puzzles for v1.
 enum class Puzzle : std::uint8_t
 {
-    TwoByTwo,    ///< 2x2x2 (Pocket cube)
-    ThreeByThree,///< 3x3x3 (Rubik's cube)
-    FourByFour,  ///< 4x4x4 (Rubik's revenge)
+    TwoByTwo,     ///< 2x2x2 (Pocket cube)
+    ThreeByThree, ///< 3x3x3 (Rubik's cube)
+    FourByFour,   ///< 4x4x4 (Rubik's revenge)
 };
 
 /// A face of the cube. Face values are grouped into axes so that a scrambler
@@ -22,17 +22,20 @@ enum class Puzzle : std::uint8_t
 /// after two parallel moves, reject the third).
 enum class Face : std::uint8_t
 {
-    U, D,  ///< axis 0
-    L, R,  ///< axis 1
-    F, B,  ///< axis 2
+    U,
+    D, ///< axis 0
+    L,
+    R, ///< axis 1
+    F,
+    B, ///< axis 2
 };
 
 /// The rotational amount of a move. 90 CW, 180, 90 CCW.
 enum class Amount : std::uint8_t
 {
-    Cw,    ///< 90° clockwise (no suffix in WCA notation)
-    Half,  ///< 180° (suffix "2")
-    Ccw,   ///< 90° counter-clockwise (suffix "'")
+    Cw,   ///< 90° clockwise (no suffix in WCA notation)
+    Half, ///< 180° (suffix "2")
+    Ccw,  ///< 90° counter-clockwise (suffix "'")
 };
 
 /// A single cube move.
@@ -40,7 +43,7 @@ struct Move
 {
     Face face;
     Amount amount;
-    bool wide;  ///< true for wide turns (Rw/Uw/...) — only meaningful on cubes ≥4x4
+    bool wide; ///< true for wide turns (Rw/Uw/...) — only meaningful on cubes ≥4x4
 
     [[nodiscard]] constexpr bool operator==(Move const&) const = default;
 };
@@ -98,9 +101,12 @@ inline constexpr PuzzleSpec Spec4x4 {
 {
     switch (puzzle)
     {
-        case Puzzle::TwoByTwo: return Spec2x2;
-        case Puzzle::ThreeByThree: return Spec3x3;
-        case Puzzle::FourByFour: return Spec4x4;
+        case Puzzle::TwoByTwo:
+            return Spec2x2;
+        case Puzzle::ThreeByThree:
+            return Spec3x3;
+        case Puzzle::FourByFour:
+            return Spec4x4;
     }
     return Spec3x3;
 }
@@ -110,8 +116,10 @@ inline constexpr PuzzleSpec Spec4x4 {
 /// if it cares about that distinction.
 [[nodiscard]] constexpr Puzzle puzzleFromKey(std::string_view key) noexcept
 {
-    if (key == "222") return Puzzle::TwoByTwo;
-    if (key == "444") return Puzzle::FourByFour;
+    if (key == "222")
+        return Puzzle::TwoByTwo;
+    if (key == "444")
+        return Puzzle::FourByFour;
     return Puzzle::ThreeByThree;
 }
 

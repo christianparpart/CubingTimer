@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
-#include <CubingTimer/StatsModel.h>
-
-#include <CubingCore/Stats.h>
-
 #include <chrono>
+
+#include <CubingCore/Stats.hpp>
+#include <CubingTimer/StatsModel.hpp>
 
 using CubingCore::Milliseconds;
 using CubingCore::Solve;
@@ -36,7 +35,10 @@ namespace
     }
 } // namespace
 
-StatsModel::StatsModel(QObject* parent): QObject(parent) {}
+StatsModel::StatsModel(QObject* parent):
+    QObject(parent)
+{
+}
 
 void StatsModel::setSource(SessionModel* source)
 {
@@ -114,7 +116,7 @@ QString StatsModel::bestAo100() const
     return fmtAvg(stats::bestAverageOf(_source->solves(), 100));
 }
 
-QString StatsModel::best90d() const
+QString StatsModel::bestLast90Days() const
 {
     if (!_source)
         return QStringLiteral("—");
@@ -122,7 +124,7 @@ QString StatsModel::best90d() const
     return fmtSingle(stats::best(filtered));
 }
 
-QString StatsModel::bestAo5_90d() const
+QString StatsModel::bestAo5Last90Days() const
 {
     if (!_source)
         return QStringLiteral("—");
@@ -130,7 +132,7 @@ QString StatsModel::bestAo5_90d() const
     return fmtAvg(stats::bestAverageOf(filtered, 5));
 }
 
-QString StatsModel::bestAo12_90d() const
+QString StatsModel::bestAo12Last90Days() const
 {
     if (!_source)
         return QStringLiteral("—");

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
-#include <CubingCore/Solve.h>
-
 #include <catch2/catch_test_macros.hpp>
+
+#include <CubingCore/Solve.hpp>
 
 using namespace CubingCore;
 using namespace std::chrono_literals;

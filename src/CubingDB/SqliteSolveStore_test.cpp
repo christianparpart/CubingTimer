@@ -1,34 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
-#include <CubingDB/InMemorySolveStore.h>
-
-#include <QtCore/QCoreApplication>
-#include <QtSql/QSqlDatabase>
-
 #include <catch2/catch_test_macros.hpp>
+
+#include <CubingDB/InMemorySolveStore.hpp>
+#include <QtSql/QSqlDatabase>
 
 using namespace CubingCore;
 using namespace std::chrono_literals;
 using CubingDB::InMemorySolveStore;
-
-namespace
-{
-    /// QSqlDatabase requires a QCoreApplication or at least a QGuiApplication.
-    /// We create one lazily for the test process.
-    struct QtFixture
-    {
-        QtFixture()
-        {
-            if (!QCoreApplication::instance())
-            {
-                static int argc = 0;
-                static char* argv[] = { nullptr };
-                static QCoreApplication app(argc, argv);
-                (void) app;
-            }
-        }
-    };
-    QtFixture gQtFixture;
-} // namespace
 
 TEST_CASE("InMemorySolveStore creates profile then lists it", "[db]")
 {

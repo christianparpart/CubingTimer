@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
-#include <CubingDB/SqliteSolveStore.h>
-
-#include <QtSql/QSqlError>
-#include <QtSql/QSqlQuery>
-
 #include <atomic>
 #include <chrono>
+
+#include <CubingDB/SqliteSolveStore.hpp>
+#include <QtSql/QSqlError>
+#include <QtSql/QSqlQuery>
 
 using CubingCore::Penalty;
 using CubingCore::Profile;
@@ -58,7 +57,8 @@ struct SqliteSolveStore::Impl
     QSqlDatabase db;
     QString connectionName;
 
-    explicit Impl(std::string const& path): connectionName(makeConnectionName())
+    explicit Impl(std::string const& path):
+        connectionName(makeConnectionName())
     {
         db = QSqlDatabase::addDatabase(QStringLiteral("QSQLITE"), connectionName);
         db.setDatabaseName(QString::fromStdString(path));
@@ -141,11 +141,11 @@ struct SqliteSolveStore::Impl
     }
 };
 
-SqliteSolveStore::SqliteSolveStore(std::string const& path): _impl(std::make_unique<Impl>(path))
+SqliteSolveStore::SqliteSolveStore(std::string const& path):
+    _impl(std::make_unique<Impl>(path))
 {
     if (!_impl->open())
-        throw std::runtime_error("Failed to open SQLite database: "
-                                 + _impl->db.lastError().text().toStdString());
+        throw std::runtime_error("Failed to open SQLite database: " + _impl->db.lastError().text().toStdString());
 }
 
 SqliteSolveStore::~SqliteSolveStore() = default;
@@ -196,8 +196,9 @@ std::expected<void, StoreError> SqliteSolveStore::deleteProfile(std::int64_t pro
     return {};
 }
 
-std::expected<Session, StoreError>
-SqliteSolveStore::createSession(std::int64_t profileId, std::string_view name, Puzzle puzzle)
+std::expected<Session, StoreError> SqliteSolveStore::createSession(std::int64_t profileId,
+                                                                   std::string_view name,
+                                                                   Puzzle puzzle)
 {
     QSqlQuery q(_impl->db);
     q.prepare(QStringLiteral("INSERT INTO session (profile_id, name, puzzle_type, created_at) "
@@ -221,9 +222,8 @@ SqliteSolveStore::createSession(std::int64_t profileId, std::string_view name, P
 std::expected<std::vector<Session>, StoreError> SqliteSolveStore::listSessions(std::int64_t profileId)
 {
     QSqlQuery q(_impl->db);
-    q.prepare(QStringLiteral(
-        "SELECT id, profile_id, name, puzzle_type, created_at "
-        "FROM session WHERE profile_id = ? ORDER BY id"));
+    q.prepare(QStringLiteral("SELECT id, profile_id, name, puzzle_type, created_at "
+                             "FROM session WHERE profile_id = ? ORDER BY id"));
     q.addBindValue(QVariant::fromValue<qlonglong>(profileId));
     if (!q.exec())
         return std::unexpected(StoreError::Backend);
@@ -256,9 +256,8 @@ std::expected<void, StoreError> SqliteSolveStore::deleteSession(std::int64_t ses
 std::expected<Solve, StoreError> SqliteSolveStore::addSolve(Solve solve)
 {
     QSqlQuery q(_impl->db);
-    q.prepare(QStringLiteral(
-        "INSERT INTO solve (session_id, puzzle_type, timestamp_ms, raw_time_ms, penalty, scramble, "
-        "comment, inspection_ms) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"));
+    q.prepare(QStringLiteral("INSERT INTO solve (session_id, puzzle_type, timestamp_ms, raw_time_ms, penalty, scramble, "
+                             "comment, inspection_ms) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"));
     q.addBindValue(QVariant::fromValue<qlonglong>(solve.sessionId));
     q.addBindValue(puzzleKey(solve.puzzle));
     q.addBindValue(QVariant::fromValue<qlonglong>(toMillis(solve.timestamp)));
@@ -279,9 +278,8 @@ std::expected<Solve, StoreError> SqliteSolveStore::addSolve(Solve solve)
 std::expected<void, StoreError> SqliteSolveStore::updateSolve(Solve const& solve)
 {
     QSqlQuery q(_impl->db);
-    q.prepare(QStringLiteral(
-        "UPDATE solve SET raw_time_ms = ?, penalty = ?, scramble = ?, comment = ?, "
-        "inspection_ms = ? WHERE id = ?"));
+    q.prepare(QStringLiteral("UPDATE solve SET raw_time_ms = ?, penalty = ?, scramble = ?, comment = ?, "
+                             "inspection_ms = ? WHERE id = ?"));
     q.addBindValue(QVariant::fromValue<qlonglong>(solve.rawTime.count()));
     q.addBindValue(static_cast<int>(solve.penalty));
     q.addBindValue(QString::fromStdString(solve.scramble));
@@ -313,9 +311,8 @@ std::expected<void, StoreError> SqliteSolveStore::deleteSolve(std::int64_t solve
 std::expected<std::vector<Solve>, StoreError> SqliteSolveStore::loadSession(std::int64_t sessionId)
 {
     QSqlQuery q(_impl->db);
-    q.prepare(QStringLiteral(
-        "SELECT id, session_id, puzzle_type, timestamp_ms, raw_time_ms, penalty, scramble, comment, "
-        "inspection_ms FROM solve WHERE session_id = ? ORDER BY timestamp_ms, id"));
+    q.prepare(QStringLiteral("SELECT id, session_id, puzzle_type, timestamp_ms, raw_time_ms, penalty, scramble, comment, "
+                             "inspection_ms FROM solve WHERE session_id = ? ORDER BY timestamp_ms, id"));
     q.addBindValue(QVariant::fromValue<qlonglong>(sessionId));
     if (!q.exec())
         return std::unexpected(StoreError::Backend);

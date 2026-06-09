@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 #pragma once
 
-#include <CubingTimer/SessionModel.h>
-
+#include <CubingTimer/SessionModel.hpp>
 #include <QtCore/QObject>
 #include <QtCore/QString>
 #include <QtQml/QQmlEngine>
@@ -31,14 +30,17 @@ class StatsModel: public QObject
     Q_PROPERTY(QString bestAo100 READ bestAo100 NOTIFY changed)
 
     // Last 90 days
-    Q_PROPERTY(QString best90d READ best90d NOTIFY changed)
-    Q_PROPERTY(QString bestAo5_90d READ bestAo5_90d NOTIFY changed)
-    Q_PROPERTY(QString bestAo12_90d READ bestAo12_90d NOTIFY changed)
+    Q_PROPERTY(QString bestLast90Days READ bestLast90Days NOTIFY changed)
+    Q_PROPERTY(QString bestAo5Last90Days READ bestAo5Last90Days NOTIFY changed)
+    Q_PROPERTY(QString bestAo12Last90Days READ bestAo12Last90Days NOTIFY changed)
 
   public:
     explicit StatsModel(QObject* parent = nullptr);
 
-    [[nodiscard]] SessionModel* source() const noexcept { return _source; }
+    [[nodiscard]] SessionModel* source() const noexcept
+    {
+        return _source;
+    }
     void setSource(SessionModel* source);
 
     [[nodiscard]] QString best() const;
@@ -51,9 +53,9 @@ class StatsModel: public QObject
     [[nodiscard]] QString bestAo12() const;
     [[nodiscard]] QString bestAo100() const;
 
-    [[nodiscard]] QString best90d() const;
-    [[nodiscard]] QString bestAo5_90d() const;
-    [[nodiscard]] QString bestAo12_90d() const;
+    [[nodiscard]] QString bestLast90Days() const;
+    [[nodiscard]] QString bestAo5Last90Days() const;
+    [[nodiscard]] QString bestAo12Last90Days() const;
 
     /// Formats a milliseconds value as "ss.cc" or "m:ss.cc" — invokable from QML.
     /// @param ms duration in milliseconds.
