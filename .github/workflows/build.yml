@@ -253,10 +253,12 @@ jobs:
 
       - name: Stage wasm bundle for upload
         # Drop the four loader files into a dedicated dir so the downloaded
-        # zip extracts as `CubingTimer-wasm/{html,js,wasm,qtloader.js}`.
+        # zip extracts as `CubingTimer-wasm/{html,js,wasm,qtloader.js}`. We
+        # use our own index.html (under wasm/) — Qt's generated one shows a
+        # blank page on mobile when GL init fails silently.
         run: |
           mkdir -p dist/CubingTimer-wasm
-          cp build/wasm/src/CubingTimer/CubingTimerApp.html dist/CubingTimer-wasm/index.html
+          cp wasm/index.html dist/CubingTimer-wasm/index.html
           cp build/wasm/src/CubingTimer/CubingTimerApp.js dist/CubingTimer-wasm/
           cp build/wasm/src/CubingTimer/CubingTimerApp.wasm dist/CubingTimer-wasm/
           cp build/wasm/src/CubingTimer/qtloader.js dist/CubingTimer-wasm/
