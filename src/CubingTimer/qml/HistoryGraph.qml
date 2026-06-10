@@ -69,6 +69,23 @@ Frame {
         rebuild();
     }
 
+    // Axes are declared at the parent scope (not inside GraphsView) because
+    // Qt 6.7's QtGraphs WASM build doesn't expose top-level `axisX` / `axisY`
+    // properties on GraphsView via QML. The LineSeries picks them up by id.
+    ValueAxis {
+        id: axisX
+        min: 0
+        max: 1
+        subTickCount: 1
+        titleText: qsTr("Solve #")
+    }
+    ValueAxis {
+        id: axisY
+        min: 0
+        max: 1
+        titleText: qsTr("Seconds")
+    }
+
     GraphsView {
         id: view
         anchors.fill: parent
@@ -77,22 +94,10 @@ Frame {
         marginLeft: 4
         marginRight: 4
 
-        axisX: ValueAxis {
-            id: axisX
-            min: 0
-            max: 1
-            subTickCount: 1
-            titleText: qsTr("Solve #")
-        }
-        axisY: ValueAxis {
-            id: axisY
-            min: 0
-            max: 1
-            titleText: qsTr("Seconds")
-        }
-
         LineSeries {
             id: series
+            axisX: axisX
+            axisY: axisY
             color: Material.color(Material.Blue, Material.Shade700)
             width: 2
         }
