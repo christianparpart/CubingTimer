@@ -72,11 +72,13 @@ Frame {
     // Axes are declared at the parent scope (not inside GraphsView) because
     // Qt 6.7's QtGraphs WASM build doesn't expose top-level `axisX` / `axisY`
     // properties on GraphsView via QML. The LineSeries picks them up by id.
+    // Note: `subTickCount` was added later in QtGraphs (works on desktop 6.11
+    // but not on 6.7 WASM). Leaving it off — the default sub-tick count is
+    // fine for our use.
     ValueAxis {
         id: axisX
         min: 0
         max: 1
-        subTickCount: 1
         titleText: qsTr("Solve #")
     }
     ValueAxis {
