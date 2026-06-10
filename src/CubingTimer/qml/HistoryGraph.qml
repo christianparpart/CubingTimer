@@ -35,7 +35,39 @@ Frame {
         function onSolvesChanged() { root.rebuild(); }
     }
 
-    Component.onCompleted: rebuild()
+    Component.onCompleted: {
+        // Configure the default theme imperatively. Declaring an inline
+        // `theme: GraphsTheme { ... }` fails on the Qt 6.7 WASM build with
+        // "GraphsTheme is not a type" because that QML type isn't exported
+        // there, even though the C++ side and desktop QML do know it.
+        var t = view.theme;
+        if (t) {
+            try {
+                t.colorScheme = 1; // GraphsTheme.ColorScheme.Light
+                t.backgroundColor = "white";
+                t.plotAreaBackgroundColor = "white";
+                if (t.grid) {
+                    t.grid.mainColor = "#e0e0e0";
+                    t.grid.subColor = "#f0f0f0";
+                    t.grid.mainWidth = 1;
+                    t.grid.subWidth = 1;
+                }
+                if (t.axisX) {
+                    t.axisX.mainColor = "#bdbdbd";
+                    t.axisX.mainWidth = 1;
+                }
+                if (t.axisY) {
+                    t.axisY.mainColor = "#bdbdbd";
+                    t.axisY.mainWidth = 1;
+                }
+            } catch (e) {
+                // Older/newer QtGraphs may name these differently; we'd
+                // rather render with default styling than crash here.
+                console.warn("HistoryGraph theme tweak failed:", e);
+            }
+        }
+        rebuild();
+    }
 
     GraphsView {
         id: view
@@ -44,30 +76,6 @@ Frame {
         marginBottom: 4
         marginLeft: 4
         marginRight: 4
-
-        // Light theme to match the rest of the app (Material light). Without
-        // this the graph defaults to a dark grid + axes on a dark background.
-        // We also lighten the grid lines — the default mainWidth=2 with a
-        // mid-grey colour reads heavier than the data line itself.
-        theme: GraphsTheme {
-            colorScheme: GraphsTheme.ColorScheme.Light
-            backgroundColor: "white"
-            plotAreaBackgroundColor: "white"
-            grid {
-                mainColor: "#e0e0e0"
-                subColor: "#f0f0f0"
-                mainWidth: 1
-                subWidth: 1
-            }
-            axisX {
-                mainColor: "#bdbdbd"
-                mainWidth: 1
-            }
-            axisY {
-                mainColor: "#bdbdbd"
-                mainWidth: 1
-            }
-        }
 
         axisX: ValueAxis {
             id: axisX

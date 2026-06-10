@@ -17,14 +17,14 @@
         color: #222;
         overflow: hidden;
       }
-      /* Qt expects a single container element. A canvas is the most reliable
-         on mobile Chrome — a div container would sometimes fail to size when
-         the address bar collapses. */
-      #qt-canvas {
+      /* Qt for WASM 6.7+ wants a <div> as the container — passing a <canvas>
+         triggers a runtime warning and an implicit conversion. */
+      #qt-container {
         display: block;
         width: 100vw;
         height: 100vh;
         background: #fafafa;
+        position: relative;
       }
       #loader, #error {
         position: absolute;
@@ -70,7 +70,7 @@
     </style>
   </head>
   <body>
-    <canvas id="qt-canvas" tabindex="-1"></canvas>
+    <div id="qt-container" tabindex="-1"></div>
 
     <div id="loader">
       <div class="spinner" aria-hidden="true"></div>
@@ -104,29 +104,34 @@
         if (el) el.textContent = text;
       }
 
-      // WebGL2 sanity check — if it's missing, Qt's Quick renderer will fail
-      // silently. Detecting early gives the user an actionable message.
-      try {
-        const probe = document.createElement('canvas');
-        if (!probe.getContext('webgl2')) {
-          showError('This device does not support WebGL2.',
-                    'CubingTimer needs WebGL2 to render. Try Chrome or Firefox ' +
-                    'on a desktop, or a newer mobile device.');
-          throw new Error('no webgl2');
+      // WebGL2 is required by Qt 6.7's Quick renderer. If it's missing,
+      // show a clear message rather than letting Qt fail silently. We only
+      // warn here — Qt itself might still succeed via fallback paths.
+      function checkWebGL2() {
+        try {
+          const probe = document.createElement('canvas');
+          if (!probe.getContext('webgl2')) {
+            showError('This browser does not expose WebGL2.',
+                      'CubingTimer needs WebGL2 to render. Try a newer Chrome / Firefox, ' +
+                      'or enable hardware acceleration in your browser settings.');
+            return false;
+          }
+        } catch (e) {
+          console.error('webgl2 probe failed:', e);
         }
-      } catch (e) {
-        console.error(e);
+        return true;
       }
 
       async function init() {
-        const canvas = document.getElementById('qt-canvas');
+        if (!checkWebGL2()) return;
+        const container = document.getElementById('qt-container');
         try {
           setStatus('Downloading…');
           await qtLoad({
             qt: {
               onLoaded: () => {
                 document.getElementById('loader').style.display = 'none';
-                canvas.focus();
+                container.focus();
               },
               onExit: exitData => {
                 showError(
@@ -135,7 +140,7 @@
                   exitData.text);
               },
               entryFunction: window.CubingTimerApp_entry,
-              containerElements: [canvas],
+              containerElements: [container],
             },
             // Surface emscripten print/error to a visible error pane so phone
             // users aren't stuck on a blank screen with no clue.
