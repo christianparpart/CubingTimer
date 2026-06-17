@@ -18,24 +18,35 @@ Frame {
             clip: true
             model: sessionModel
             delegate: ItemDelegate {
+                id: solveRow
+
+                // Explicit, role-typed required properties (the modern Qt 6 form).
+                // Unlike the implicit context-object access, these re-evaluate when
+                // the model emits dataChanged for the matching role, so editing a
+                // solve's penalty (+2 / DNF / OK) repaints its history row in place.
+                required property int index
+                required property int penalty
+                required property var effectiveTimeMs
+                required property string scramble
+
                 width: ListView.view ? ListView.view.width : 0
                 contentItem: RowLayout {
                     Label {
-                        text: "#" + (sessionModel.count - index)
+                        text: "#" + (sessionModel.count - solveRow.index)
                         Layout.preferredWidth: 48
                         opacity: 0.6
                     }
                     Label {
-                        text: penalty === 2 ? "DNF" : statsModel.formatMs(effectiveTimeMs)
+                        text: solveRow.penalty === 2 ? qsTr("DNF") : statsModel.formatMs(solveRow.effectiveTimeMs)
                         font.bold: true
                         Layout.preferredWidth: 100
                     }
                     Label {
-                        text: penalty === 1 ? qsTr("+2") : ""
+                        text: solveRow.penalty === 1 ? qsTr("+2") : ""
                         opacity: 0.7
                     }
                     Label {
-                        text: scramble
+                        text: solveRow.scramble
                         elide: Text.ElideRight
                         Layout.fillWidth: true
                         opacity: 0.7

@@ -24,6 +24,17 @@ ApplicationWindow {
     // viewports the timer gets the full width and stats/graph/list flow below.
     readonly property bool narrow: width < 820
 
+    /// Hand keyboard focus to whichever layout Loader is currently active, so the
+    /// TimerScreen's SPACE / Esc key handlers keep working after the layout flips
+    /// across the reflow threshold (a Loader does not focus its item automatically).
+    function focusActiveLayout() {
+        const loaded = narrow ? narrowLoader.item : wideLoader.item;
+        if (loaded && loaded.timerScreen)
+            loaded.timerScreen.forceActiveFocus();
+    }
+
+    onNarrowChanged: Qt.callLater(focusActiveLayout)
+
     header: ToolBar {
         Material.elevation: 2
         RowLayout {
@@ -87,15 +98,21 @@ ApplicationWindow {
 
     // Wide layout: side-by-side, with a resizable splitter.
     Loader {
+        id: wideLoader
         anchors.fill: parent
         active: !window.narrow
+        focus: true
         sourceComponent: wideLayout
+        onLoaded: if (active && item.timerScreen) item.timerScreen.forceActiveFocus()
     }
     // Narrow layout: single column, stats panel collapses under the timer.
     Loader {
+        id: narrowLoader
         anchors.fill: parent
         active: window.narrow
+        focus: true
         sourceComponent: narrowLayout
+        onLoaded: if (active && item.timerScreen) item.timerScreen.forceActiveFocus()
     }
 
     Component {
@@ -103,7 +120,13 @@ ApplicationWindow {
         SplitView {
             orientation: Qt.Horizontal
 
+            // Expose the TimerScreen as the layout's focus item so the Loader can
+            // forward keyboard focus straight to its SPACE / Esc key handlers.
+            property alias timerScreen: wideTimer
+
             TimerScreen {
+                id: wideTimer
+                focus: true
                 SplitView.fillWidth: true
                 SplitView.minimumWidth: 380
             }
@@ -132,12 +155,19 @@ ApplicationWindow {
             contentWidth: width
             contentHeight: stack.implicitHeight
             clip: true
+
+            // Expose the TimerScreen as the layout's focus item so the Loader can
+            // forward keyboard focus straight to its SPACE / Esc key handlers.
+            property alias timerScreen: narrowTimer
+
             ColumnLayout {
                 id: stack
                 width: parent.width
                 spacing: 0
 
                 TimerScreen {
+                    id: narrowTimer
+                    focus: true
                     Layout.fillWidth: true
                     Layout.preferredHeight: Math.max(360, window.height * 0.55)
                 }
@@ -161,11 +191,15 @@ ApplicationWindow {
         title: qsTr("New profile")
         anchors.centerIn: parent
         modal: true
+        width: Math.min(360, parent.width - 40)
         standardButtons: Dialog.Ok | Dialog.Cancel
-        TextField {
-            id: profileNameField
-            placeholderText: qsTr("name")
-            width: 280
+        ColumnLayout {
+            anchors.fill: parent
+            TextField {
+                id: profileNameField
+                placeholderText: qsTr("name")
+                Layout.fillWidth: true
+            }
         }
         onAccepted: {
             if (profileNameField.text.length > 0)

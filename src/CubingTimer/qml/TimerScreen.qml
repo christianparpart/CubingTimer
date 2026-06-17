@@ -23,15 +23,40 @@ Item {
         return statsModel.formatMs(ms);
     }
 
+    // The big time string. While a solve is on screen (Stopped) it reflects the
+    // *recorded* solve — i.e. the penalty just applied via +2 / DNF / OK — so those
+    // buttons give immediate feedback. In every other state it tracks the live
+    // running/inspection clock.
+    function displayTime() {
+        if (timerController.inspectionEnabled
+                && (timerController.state === 2 || timerController.state === 3 || timerController.state === 4))
+            return Math.max(0, 15 - Math.floor(timerController.inspectionElapsedMs / 1000)).toString();
+        if (timerController.state === 6) {
+            if (sessionModel.lastPenalty === 2) // Dnf
+                return qsTr("DNF");
+            return formatElapsed(sessionModel.lastEffectiveTimeMs);
+        }
+        return formatElapsed(timerController.elapsedMs);
+    }
+
     // Scale the big time display so it always fits the available width.
     // ~ width / 5 puts ~5 characters across a typical view; clamp so it neither
     // disappears on narrow phones nor swamps a wide desktop window.
     readonly property real bigTimePx: Math.max(48, Math.min(width / 5, height / 3.5, 200))
-    readonly property real scramblePx: Math.max(14, Math.min(width / 30, 24))
+    readonly property real scramblePx: Math.max(22, Math.min(width / 18, 40))
 
     Rectangle {
         anchors.fill: parent
         color: stateColor(timerController.state)
+
+        // Declared first so it sits *below* the controls in z-order: it catches
+        // the whole-screen hold/tap-to-start gesture, while the buttons and the
+        // Inspection checkbox painted on top win the events over their own area.
+        MouseArea {
+            anchors.fill: parent
+            onPressed: handlePress()
+            onReleased: handleRelease()
+        }
 
         ColumnLayout {
             anchors.fill: parent
@@ -54,10 +79,7 @@ Item {
                 font.pixelSize: root.bigTimePx
                 font.bold: true
                 fontSizeMode: Text.HorizontalFit
-                text: timerController.inspectionEnabled
-                      && (timerController.state === 2 || timerController.state === 3 || timerController.state === 4)
-                      ? Math.max(0, 15 - Math.floor(timerController.inspectionElapsedMs / 1000)).toString()
-                      : formatElapsed(timerController.elapsedMs)
+                text: displayTime()
             }
 
             Label {
@@ -67,7 +89,7 @@ Item {
                        : timerController.state === 3 ? qsTr("Keep holding…")
                        : timerController.state === 4 ? qsTr("Release to start")
                        : timerController.state === 5 ? qsTr("Press any key to stop")
-                       : timerController.state === 6 ? qsTr("Solved! Press SPACE for the next")
+                       : timerController.state === 6 ? qsTr("Solved! Adjust with +2 / DNF / OK, or press SPACE for the next")
                        : ""
             }
 
@@ -100,12 +122,6 @@ Item {
                     onToggled: timerController.inspectionEnabled = checked
                 }
             }
-        }
-
-        MouseArea {
-            anchors.fill: parent
-            onPressed: handlePress()
-            onReleased: handleRelease()
         }
     }
 
