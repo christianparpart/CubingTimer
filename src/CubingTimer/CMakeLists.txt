@@ -63,6 +63,7 @@ if(CUBINGTIMER_TESTING)
         StatsModel.cpp
         ProfileController.cpp
         TimerController_test.cpp
+        SessionModel_test.cpp
         StatsModel_test.cpp
         ProfileController_test.cpp
     )

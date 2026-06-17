@@ -22,6 +22,8 @@ class SessionModel: public QAbstractListModel
 
     Q_PROPERTY(qint64 sessionId READ sessionId WRITE setSessionId NOTIFY sessionIdChanged)
     Q_PROPERTY(int count READ rowCount NOTIFY countChanged)
+    Q_PROPERTY(int lastPenalty READ lastPenalty NOTIFY solvesChanged)
+    Q_PROPERTY(qint64 lastEffectiveTimeMs READ lastEffectiveTimeMs NOTIFY solvesChanged)
 
   public:
     enum class Roles : std::uint16_t
@@ -45,6 +47,17 @@ class SessionModel: public QAbstractListModel
         return _sessionId;
     }
     void setSessionId(qint64 sessionId);
+
+    /// Penalty of the most recently recorded solve, for at-a-glance feedback in
+    /// the timer display.
+    /// @return the last solve's penalty cast to int (0 OK, 1 +2, 2 DNF), or
+    ///         0 (OK) when no solve has been recorded yet.
+    [[nodiscard]] int lastPenalty() const noexcept;
+
+    /// Effective (penalty-adjusted) time of the most recently recorded solve.
+    /// @return the last solve's effective time in milliseconds, -1 for a DNF,
+    ///         or -1 when no solve has been recorded yet.
+    [[nodiscard]] qint64 lastEffectiveTimeMs() const noexcept;
 
     // QAbstractListModel
     [[nodiscard]] int rowCount(QModelIndex const& parent = {}) const override;

@@ -31,6 +31,21 @@ void SessionModel::setSessionId(qint64 sessionId)
     reload();
 }
 
+int SessionModel::lastPenalty() const noexcept
+{
+    if (_solves.empty())
+        return static_cast<int>(Penalty::Ok);
+    return static_cast<int>(_solves.back().penalty);
+}
+
+qint64 SessionModel::lastEffectiveTimeMs() const noexcept
+{
+    if (_solves.empty())
+        return -1;
+    auto const t = _solves.back().effectiveTime();
+    return t ? t->count() : -1;
+}
+
 void SessionModel::reload()
 {
     beginResetModel();
